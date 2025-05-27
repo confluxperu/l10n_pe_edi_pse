@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res_config_settings_view_pe_form.electronic.inv</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='stock']/block[@name='shipping_setting_container']" position="after">
+                <block title="Logistic" name="logistic_setting_container">
+                    <setting help="Logistic">
+                        <div class="text-muted">
+                                Restrict despatch creation only when picking has done.
+                        </div>
+                        <div class="content-group">
+                            <div class="row mt32">
+                                <label for="logistic_picking_done_restrict" class="col-md-5 o_light_label"/>
+                                <field name="logistic_picking_done_restrict"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

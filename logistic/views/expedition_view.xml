@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="logistic_root"
+              name="Logistic"
+              sequence="11"
+              />
+        <menuitem id="logistic_operations"
+              parent="logistic_root" 
+              name="Operations"
+              sequence="1"
+              />
+        <menuitem id="logistic_reports"
+              parent="logistic_root" 
+              name="Reports"
+              sequence="2"
+              />
+        <menuitem id="logistic_settings"
+              parent="logistic_root" 
+              name="Settings"
+              sequence="3"
+              />
+    </data>        
+</odoo>

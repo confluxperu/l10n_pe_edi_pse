@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_edi_form" model="ir.ui.view">
+            <field name="name">stock.picking.form.edi_despatch</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="l10n_pe_edi_stock.view_picking_edi_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_send_delivery_guide']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='l10n_pe_edi_action_download']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_send_delivery_guide']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='l10n_pe_edi_status']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='l10n_pe_edi_transport_type']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='l10n_pe_edi_reason_for_transfer']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='l10n_pe_edi_departure_start_date']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

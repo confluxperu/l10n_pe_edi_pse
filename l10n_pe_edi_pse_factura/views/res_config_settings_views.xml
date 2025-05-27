@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_form_inherit_l10n_pe_edi_pse_factura" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.l10n.pe.edi.pse.factura</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="l10n_pe_edi.res_config_settings_form_inherit_l10n_pe_edi"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='invoicing_peruvian_settings']" position="inside">
+                <setting help="PSE Authorization" invisible="l10n_pe_edi_provider != 'conflux'">
+                    <div class="text-muted">
+                            <strong>PSE</strong> is an official SUNAT provider, you need an account in the PSE portal to use the services<br/>
+                        </div>
+                    <div class="content-group">
+                        <div class="row mt32">
+                            <label for="l10n_pe_edi_pse_client_id" class="col-md-5 o_light_label"/>
+                            <field name="l10n_pe_edi_pse_client_id"/>
+                            <label for="l10n_pe_edi_pse_secret_key" class="col-md-5 o_light_label"/>
+                            <field name="l10n_pe_edi_pse_secret_key" password="True"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
