@@ -259,6 +259,7 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    l10n_pe_edi_allowance_charge_reason_code = fields.Selection(selection_add=[('03','Descuentos globales que no afectan la base imponible del IGV/IVAP')])
     l10n_pe_edi_downpayment_line = fields.Boolean('Is Downpayment?', store=True, default=False)
     l10n_pe_edi_downpayment_invoice_id = fields.Many2one('account.move', string='Downpayment Invoice', store=True, readonly=True, help='Invoices related to the advance regualization')
     l10n_pe_edi_downpayment_ref_type = fields.Selection([('02','Factura'),('03','Boleta de venta')], string='Downpayment Ref. Type')
