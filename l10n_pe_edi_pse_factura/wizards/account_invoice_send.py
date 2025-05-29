@@ -20,7 +20,7 @@ class AccountInvoiceSend(models.TransientModel):
     
     @api.model
     def _get_invoice_extra_attachments_data(self, move):
-        invoice_id = move
+        invoice_id = move.sudo()
         res = super(AccountInvoiceSend, self)._get_invoice_extra_attachments_data(move)
         if move.company_id.l10n_pe_edi_provider!='conflux':
             return res
@@ -37,6 +37,7 @@ class AccountInvoiceSend(models.TransientModel):
             invoice_id.l10n_pe_edi_pdf_file.write({
                 "datas": base64.encodebytes(data_content),
                 "type": "binary",
+                "public": True
             })
             res = []
             res.append({
@@ -52,6 +53,7 @@ class AccountInvoiceSend(models.TransientModel):
             invoice_id.l10n_pe_edi_cdr_file.write({
                 "datas": base64.encodebytes(data_content),
                 "type": "binary",
+                "public": True
             })
             res.append({
                 'id': invoice_id.l10n_pe_edi_cdr_file.id,
@@ -66,6 +68,7 @@ class AccountInvoiceSend(models.TransientModel):
             invoice_id.l10n_pe_edi_xml_file.write({
                 "datas": base64.encodebytes(data_content),
                 "type": "binary",
+                "public": True
             })
             res.append({
                 'id': invoice_id.l10n_pe_edi_xml_file.id,

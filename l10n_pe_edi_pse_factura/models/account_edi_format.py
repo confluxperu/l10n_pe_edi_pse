@@ -98,8 +98,8 @@ class AccountEdiFormat(models.Model):
             "cliente_numero_de_documento":record.partner_id.vat,
             "cliente_denominacion": record.partner_id.name,
             "cliente_direccion": (record.partner_id.street or '') \
-                                + (record.partner_id.district_id and ', ' + record.partner_id.district_id.name or '') \
-                                + (record.partner_id.province_id and ', ' + record.partner_id.province_id.name or '') \
+                                + (record.partner_id.l10n_pe_district and ', ' + record.partner_id.l10n_pe_district.name or '') \
+                                + (record.partner_id.city_id and ', ' + record.partner_id.city_id.name or '') \
                                 + (record.partner_id.state_id and ', ' + record.partner_id.state_id.name or '') \
                                 + (record.partner_id.country_id and ', ' + record.partner_id.country_id.name or ''),
             "cliente_email": record.partner_id.email if record.partner_id.email else '',
@@ -234,7 +234,7 @@ class AccountEdiFormat(models.Model):
                     _item = {
                         "codigo":line.product_id.default_code if line.product_id.default_code else '',
                         "codigo_producto_sunat":line.product_id.unspsc_code_id.code if line.product_id.unspsc_code_id else '',
-                        "descripcion":line.name,
+                        "descripcion":line.name.replace('[%s] ' % line.product_id.default_code,'') if line.product_id else line.name,
                         "cantidad":abs(invoice_line['line_quantity']),
                         "unidad_de_medida":line.product_uom_id.l10n_pe_edi_measure_unit_code if line.product_uom_id.l10n_pe_edi_measure_unit_code else default_uom,
                         'valor_unitario': valor_unitario,

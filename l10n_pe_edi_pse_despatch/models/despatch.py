@@ -310,8 +310,8 @@ class LogisticDespatch(models.Model):
                                 + (self.partner_id.street_number and (' ' + self.partner_id.street_number) or '') \
                                 + (self.partner_id.street_number2 and (' ' + self.partner_id.street_number2) or '') \
                                 + (self.partner_id.street2 and (' ' + self.partner_id.street2) or '') \
-                                + (self.partner_id.district_id and ', ' + self.partner_id.district_id.name or '') \
-                                + (self.partner_id.province_id and ', ' + self.partner_id.province_id.name or '') \
+                                + (self.partner_id.l10n_pe_district and ', ' + self.partner_id.l10n_pe_district.name or '') \
+                                + (self.partner_id.city_id and ', ' + self.partner_id.city_id.name or '') \
                                 + (self.partner_id.state_id and ', ' + self.partner_id.state_id.name or '') \
                                 + (self.partner_id.country_id and ', ' + self.partner_id.country_id.name or ''),
             'fecha_de_emision': self.issue_date.strftime("%Y-%m-%d"),
@@ -321,25 +321,25 @@ class LogisticDespatch(models.Model):
             'unidad_de_medida_peso': 'KGM',
             'bultos_paquetes': self.packages,
             'origen_establecimiento_anexo': self.l10n_pe_edi_origin_branch_code or None,
-            'origen_ubigeo': self.origin_address_id.district_id.code if self.origin_address_id.district_id else False,
+            'origen_ubigeo': self.origin_address_id.l10n_pe_district.code if self.origin_address_id.l10n_pe_district else False,
             #'origen_direccion': self.origin_address_id.street,
             'origen_direccion': (self.origin_address_id.street_name or '') \
                                 + (self.origin_address_id.street_number and (' ' + self.origin_address_id.street_number) or '') \
                                 + (self.origin_address_id.street_number2 and (' ' + self.origin_address_id.street_number2) or '') \
                                 + (self.origin_address_id.street2 and (' ' + self.origin_address_id.street2) or '') \
-                                + (self.origin_address_id.district_id and ', ' + self.origin_address_id.district_id.name or '') \
-                                + (self.origin_address_id.province_id and ', ' + self.origin_address_id.province_id.name or '') \
+                                + (self.origin_address_id.l10n_pe_district and ', ' + self.origin_address_id.l10n_pe_district.name or '') \
+                                + (self.origin_address_id.city_id and ', ' + self.origin_address_id.city_id.name or '') \
                                 + (self.origin_address_id.state_id and ', ' + self.origin_address_id.state_id.name or '') \
                                 + (self.origin_address_id.country_id and ', ' + self.origin_address_id.country_id.name or ''),
             'destino_establecimiento_anexo': self.l10n_pe_edi_delivery_branch_code or None,
-            'destino_ubigeo': self.delivery_address_id.district_id.code if self.delivery_address_id.district_id else False,
+            'destino_ubigeo': self.delivery_address_id.l10n_pe_district.code if self.delivery_address_id.l10n_pe_district else False,
             #'destino_direccion': self.delivery_address_id.street ,
             'destino_direccion': (self.delivery_address_id.street_name or '') \
                                 + (self.delivery_address_id.street_number and (' ' + self.delivery_address_id.street_number) or '') \
                                 + (self.delivery_address_id.street_number2 and (' ' + self.delivery_address_id.street_number2) or '') \
                                 + (self.delivery_address_id.street2 and (' ' + self.delivery_address_id.street2) or '') \
-                                + (self.delivery_address_id.district_id and ', ' + self.delivery_address_id.district_id.name or '') \
-                                + (self.delivery_address_id.province_id and ', ' + self.delivery_address_id.province_id.name or '') \
+                                + (self.delivery_address_id.l10n_pe_district and ', ' + self.delivery_address_id.l10n_pe_district.name or '') \
+                                + (self.delivery_address_id.city_id and ', ' + self.delivery_address_id.city_id.name or '') \
                                 + (self.delivery_address_id.state_id and ', ' + self.delivery_address_id.state_id.name or '') \
                                 + (self.delivery_address_id.country_id and ', ' + self.delivery_address_id.country_id.name or ''),
             #'observaciones': self.note,
