@@ -175,10 +175,34 @@ class AccountEdiFormat(models.Model):
         if base_dte['vals'].get('line_vals'):
             for invoice_line in base_dte['vals'].get('line_vals', []):
                 line = invoice_line.get('line')
+                igv_type = '10'
+                isc_type = ''
+                is_free = False
+                is_exo_or_unaffected = False
+
+                igv_amount = 0
+                isc_amount = 0
+                icbper_amount = 0
+
+                for tax_total in invoice_line['tax_total_vals']:
+                    for tax in tax_total['tax_subtotal_vals']:
+                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
+                            igv_amount+=tax['tax_amount']
+                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ISC':
+                            isc_type = tax['tax_category_vals']['tax_exemption_reason_code']
+                            isc_amount+=tax['tax_amount']
+                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ICBPER':
+                            icbper_amount+=tax['tax_amount']
+                        if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('IGV','EXO','INA','EXP','GRA'):
+                            igv_type = tax['tax_category_vals']['tax_exemption_reason_code']
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('EXO','INA','EXP'):
+                                is_exo_or_unaffected = True
+                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
+                            is_free = True
                 if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code in ('02','00'):
                     descuento_importe_02+=abs(line.price_subtotal)
                     continue
-                if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code=='03':
+                if line.price_subtotal<0 and not line.l10n_pe_edi_downpayment_line and (line.l10n_pe_edi_allowance_charge_reason_code=='03' or is_exo_or_unaffected):
                     descuento_importe_03+=abs(line.price_subtotal)
                     continue
                 if not line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
@@ -190,27 +214,6 @@ class AccountEdiFormat(models.Model):
                     if line.product_id.type=='service':
                         default_uom = 'ZZ'
 
-                    igv_type = '10'
-                    isc_type = ''
-                    is_free = False
-
-                    igv_amount = 0
-                    isc_amount = 0
-                    icbper_amount = 0
-
-                    for tax_total in invoice_line['tax_total_vals']:
-                        for tax in tax_total['tax_subtotal_vals']:
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
-                                igv_amount+=tax['tax_amount']
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ISC':
-                                isc_type = tax['tax_category_vals']['tax_exemption_reason_code']
-                                isc_amount+=tax['tax_amount']
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ICBPER':
-                                icbper_amount+=tax['tax_amount']
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('IGV','EXO','INA','EXP','GRA'):
-                                igv_type = tax['tax_category_vals']['tax_exemption_reason_code']
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
-                                is_free = True
                     valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     if line.discount==100:
