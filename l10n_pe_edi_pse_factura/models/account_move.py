@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 from odoo.tools import float_round
 
 import logging
@@ -124,37 +125,38 @@ class AccountMove(models.Model):
         untaxed_amount_currency = self.amount_untaxed * sign - deduction
         untaxed_amount = self.amount_untaxed - deduction
 
-        if self.invoice_payment_term_id:
-            invoice_payment_terms = self.invoice_payment_term_id._compute_terms(
-                date_ref=self.invoice_date or self.date or fields.Date.context_today(self),
-                currency=self.currency_id,
-                tax_amount_currency=tax_amount_currency,
-                tax_amount=tax_amount,
-                untaxed_amount_currency=untaxed_amount_currency,
-                untaxed_amount=untaxed_amount,
-                company=self.company_id,
-                cash_rounding=self.invoice_cash_rounding_id,
-                sign=sign
-            )
-            for term_line in invoice_payment_terms['line_ids']:
-                due_date = fields.Date.to_date(term_line.get('date'))
-                if due_date > self.invoice_date:
+        if untaxed_amount>0 and self.move_type == 'out_invoice':
+            if self.invoice_payment_term_id:
+                invoice_payment_terms = self.invoice_payment_term_id._compute_terms(
+                    date_ref=self.invoice_date or self.date or fields.Date.context_today(self),
+                    currency=self.currency_id,
+                    tax_amount_currency=tax_amount_currency,
+                    tax_amount=tax_amount,
+                    untaxed_amount_currency=untaxed_amount_currency,
+                    untaxed_amount=untaxed_amount,
+                    company=self.company_id,
+                    cash_rounding=self.invoice_cash_rounding_id,
+                    sign=sign
+                )
+                for term_line in invoice_payment_terms['line_ids']:
+                    due_date = fields.Date.to_date(term_line.get('date'))
+                    if due_date > self.invoice_date:
+                        invoice_date_due_vals_list.append([0, 0, {
+                            'amount_total': term_line['company_amount'],
+                            'currency_id': self.currency_id.id,
+                            'date_due': due_date
+                        }])
+            else:
+                if self.invoice_date_due and self.invoice_date_due > self.invoice_date:
                     invoice_date_due_vals_list.append([0, 0, {
-                        'amount_total': term_line['company_amount'],
+                        'amount_total': self.amount_total_signed,
                         'currency_id': self.currency_id.id,
-                        'date_due': due_date
+                        'date_due': self.invoice_date_due
                     }])
-        else:
-            if self.invoice_date_due and self.invoice_date_due > self.invoice_date:
-                invoice_date_due_vals_list.append([0, 0, {
-                    'amount_total': self.amount_total_signed,
-                    'currency_id': self.currency_id.id,
-                    'date_due': self.invoice_date_due
-                }])
 
-        self.write({
-            'l10n_pe_edi_payment_fee_ids': invoice_date_due_vals_list
-        })
+            self.write({
+                'l10n_pe_edi_payment_fee_ids': invoice_date_due_vals_list
+            })
 
     def _retry_edi_documents_error_hook(self):
         for move in self.filtered(lambda m: m.l10n_pe_edi_pse_uid and (m.l10n_pe_edi_pse_status=='ask_for_status')):

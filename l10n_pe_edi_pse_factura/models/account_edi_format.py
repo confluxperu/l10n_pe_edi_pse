@@ -189,7 +189,7 @@ class AccountEdiFormat(models.Model):
                         if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
                             igv_amount+=tax['tax_amount']
                         if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ISC':
-                            isc_type = tax['tax_category_vals']['tax_exemption_reason_code']
+                            isc_type = tax['tax_category_vals']['tier_range']
                             isc_amount+=tax['tax_amount']
                         if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ICBPER':
                             icbper_amount+=tax['tax_amount']
@@ -517,7 +517,7 @@ class AccountEdiFormat(models.Model):
             if result['message'] == 'no-credit':
                 error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
             else:
-                error_message = result['message']
+                error_message = '%s - [LOG: %s]' % (result['message'], json.dumps(result))
             return {'error': error_message, 'blocking_level': 'error'}
 
         xml_url = None
@@ -540,6 +540,7 @@ class AccountEdiFormat(models.Model):
                 log.info(data_dict)
                 edi_status = 'rejected'
                 success = True
+                error_message = result['success']['data']['sunat_description']
                 
             return {
                 'success':success,
@@ -547,9 +548,10 @@ class AccountEdiFormat(models.Model):
                 'xml_url':xml_url,
                 'pdf_url':pdf_url,
                 'cdr_url':cdr_url,
-                'pse_status': edi_status
+                'pse_status': edi_status,
+                'extra_msg': error_message if edi_status == 'rejected' else ''
             }
-        extra_msg = result.get('message','')
+        extra_msg = error_message
         return {'xml_url': xml_url, 'cdr_url': cdr_url, 'extra_msg': extra_msg}
     
     def _l10n_pe_edi_pse_cancel_invoices_step_1_conflux(self, company, invoice):
