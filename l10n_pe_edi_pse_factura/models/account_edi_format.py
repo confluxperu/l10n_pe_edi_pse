@@ -199,6 +199,11 @@ class AccountEdiFormat(models.Model):
                                 is_exo_or_unaffected = True
                         if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
                             is_free = True
+
+                if is_free:
+                    conflux_dte['total_isc']-=isc_amount
+                    conflux_dte['total']-=isc_amount
+
                 if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code in ('02','00'):
                     descuento_importe_02+=abs(line.price_subtotal)
                     continue
