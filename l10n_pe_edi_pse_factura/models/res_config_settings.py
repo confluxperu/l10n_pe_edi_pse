@@ -14,3 +14,7 @@ class ResConfigSettings(models.TransientModel):
         string="PSE Secret Key",
         related="company_id.l10n_pe_edi_pse_secret_key",
         readonly=False)
+    l10n_pe_edi_pse_use_pdf_format = fields.Boolean(
+        string="PSE Use PDF Format",
+        related="company_id.l10n_pe_edi_pse_use_pdf_format",
+        readonly=False)

@@ -38,8 +38,7 @@ class LogisticDespatch(models.Model):
         return lst
 
     l10n_pe_edi_pse_uid = fields.Char(string='PSE Unique identifier', copy=False)
-    l10n_latam_country_code = fields.Char("Country Code (LATAM)",
-        related='company_id.country_id.code', help='Technical field used to hide/show fields regarding the localization')
+    l10n_latam_country_code = fields.Char("Country Code (LATAM)", help='Technical field used to hide/show fields regarding the localization') # TO DEPRECATE
     l10n_pe_edi_shipment_reason = fields.Selection('get_l10n_pe_edi_shipment_reason', string='Reason', required=True, readonly=False, default='01')
     l10n_pe_edi_transport_mode = fields.Selection('get_l10n_pe_edi_transport_mode', string='Mode', required=True, readonly=False, default='02')
     l10n_pe_edi_status = fields.Selection([
@@ -139,6 +138,8 @@ class LogisticDespatch(models.Model):
     def action_open(self):
         res = super(LogisticDespatch, self).action_open()
         for move in self:
+            move._onchange_origin_address_id()
+            move._onchange_delivery_address_id()
             move.l10n_pe_edi_is_einvoice = True
             conf = self.env['ir.config_parameter']
             l10n_pe_edi_send_immediately = bool(conf.sudo().get_param('account.l10n_pe_edi_send_immediately_%s' % move.company_id.id,False))
@@ -268,7 +269,7 @@ class LogisticDespatch(models.Model):
                                 xml_attach = ir_attach.create({
                                     "name":"R-%s-%s.zip" % (move.company_id.vat, move.id),
                                     'res_model': self._name,
-                                    'res_id': self.id,
+                                    'res_id': move.id,
                                     "type":'url',
                                     "company_id": move.company_id.id,
                                     "url":response[1].get("enlace_del_cdr")
@@ -306,14 +307,8 @@ class LogisticDespatch(models.Model):
             'receptor_denominacion': self.partner_id.name,
             'receptor_tipo_de_documento': self.partner_id.l10n_latam_identification_type_id.l10n_pe_vat_code,
             'receptor_numero_de_documento': self.partner_id.vat,
-            'receptor_direccion': (self.partner_id.street_name or '') \
-                                + (self.partner_id.street_number and (' ' + self.partner_id.street_number) or '') \
-                                + (self.partner_id.street_number2 and (' ' + self.partner_id.street_number2) or '') \
-                                + (self.partner_id.street2 and (' ' + self.partner_id.street2) or '') \
-                                + (self.partner_id.l10n_pe_district and ', ' + self.partner_id.l10n_pe_district.name or '') \
-                                + (self.partner_id.city_id and ', ' + self.partner_id.city_id.name or '') \
-                                + (self.partner_id.state_id and ', ' + self.partner_id.state_id.name or '') \
-                                + (self.partner_id.country_id and ', ' + self.partner_id.country_id.name or ''),
+            'receptor_direccion': self.partner_id.street,
+
             'fecha_de_emision': self.issue_date.strftime("%Y-%m-%d"),
             'fecha_de_inicio': self.start_date.strftime("%Y-%m-%d"),
 
@@ -442,7 +437,7 @@ class LogisticDespatch(models.Model):
     def verify_address_street(self, address_street):
         new_address = address_street
         new_address = new_address.translate(
-            {ord(c): " " for c in "°!@#$%^&*()[]{};:,./<>?\|`~-=_+'"})
+            {ord(c): " " for c in "°!@#$%^&*()[]{};:,./<>?\\|`~-=_+'"})
         new_address = new_address.strip()
         count_newaddress = len(new_address)
         if count_newaddress > 0:

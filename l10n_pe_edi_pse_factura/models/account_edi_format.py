@@ -162,9 +162,6 @@ class AccountEdiFormat(models.Model):
                     conflux_dte['total_icbper']+=tax_subtotal['tax_amount']
                 if tax_subtotal['tax_category_vals']['tax_scheme_vals']['name']=='OTROS':
                     conflux_dte['total_otros_cargos']+=tax_subtotal['tax_amount']
-
-        if round(conflux_dte['total_gravada'],2)==-0.01:
-            conflux_dte['total_gravada'] = 0
         
         conflux_dte['total'] = conflux_dte['total_gravada']+conflux_dte['total_igv']+conflux_dte['total_exonerada']+conflux_dte['total_inafecta']+conflux_dte['total_exportacion']+conflux_dte['total_isc']+conflux_dte['total_icbper']
 
@@ -175,39 +172,10 @@ class AccountEdiFormat(models.Model):
         if base_dte['vals'].get('line_vals'):
             for invoice_line in base_dte['vals'].get('line_vals', []):
                 line = invoice_line.get('line')
-                igv_type = '10'
-                isc_type = ''
-                is_free = False
-                is_exo_or_unaffected = False
-
-                igv_amount = 0
-                isc_amount = 0
-                icbper_amount = 0
-
-                for tax_total in invoice_line['tax_total_vals']:
-                    for tax in tax_total['tax_subtotal_vals']:
-                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
-                            igv_amount+=tax['tax_amount']
-                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ISC':
-                            isc_type = tax['tax_category_vals']['tier_range']
-                            isc_amount+=tax['tax_amount']
-                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ICBPER':
-                            icbper_amount+=tax['tax_amount']
-                        if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('IGV','EXO','INA','EXP','GRA'):
-                            igv_type = tax['tax_category_vals']['tax_exemption_reason_code']
-                            if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('EXO','INA','EXP'):
-                                is_exo_or_unaffected = True
-                        if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
-                            is_free = True
-
-                if is_free:
-                    conflux_dte['total_isc']-=isc_amount
-                    conflux_dte['total']-=isc_amount
-
                 if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code in ('02','00'):
                     descuento_importe_02+=abs(line.price_subtotal)
                     continue
-                if line.price_subtotal<0 and not line.l10n_pe_edi_downpayment_line and (line.l10n_pe_edi_allowance_charge_reason_code=='03' or is_exo_or_unaffected):
+                if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code=='03':
                     descuento_importe_03+=abs(line.price_subtotal)
                     continue
                 if not line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
@@ -219,6 +187,27 @@ class AccountEdiFormat(models.Model):
                     if line.product_id.type=='service':
                         default_uom = 'ZZ'
 
+                    igv_type = '10'
+                    isc_type = ''
+                    is_free = False
+
+                    igv_amount = 0
+                    isc_amount = 0
+                    icbper_amount = 0
+
+                    for tax_total in invoice_line['tax_total_vals']:
+                        for tax in tax_total['tax_subtotal_vals']:
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
+                                igv_amount+=tax['tax_amount']
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ISC':
+                                isc_type = tax['tax_category_vals']['tax_exemption_reason_code']
+                                isc_amount+=tax['tax_amount']
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'ICBPER':
+                                icbper_amount+=tax['tax_amount']
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] in ('IGV','EXO','INA','EXP','GRA'):
+                                igv_type = tax['tax_category_vals']['tax_exemption_reason_code']
+                            if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
+                                is_free = True
                     valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     if line.discount==100:
@@ -271,27 +260,19 @@ class AccountEdiFormat(models.Model):
                         _item['anticipo_tipo_de_documento'] = line.l10n_pe_edi_downpayment_ref_type
                         if line.l10n_pe_edi_downpayment_date:
                             _item['anticipo_fecha'] = line.l10n_pe_edi_downpayment_date.strftime('%Y-%m-%d')
-                        conflux_dte['total_prepagado']+=abs(line.price_total)
                     conflux_dte['items'].append(_item)
 
-        if conflux_dte['total_prepagado']>0:
-            if abs(round(conflux_dte['total_gravada'],2))<=0.01:
-                conflux_dte['total_gravada'] = 0
-            if abs(round(conflux_dte['total_igv'],2))<=0.01:
-                conflux_dte['total_igv'] = 0
-            if abs(round(conflux_dte['total'],2))<=0.01:
-                conflux_dte['total'] = 0
 
         if record.ref and record.l10n_latam_document_type_id.internal_type == 'invoice':
             conflux_dte['orden_compra_servicio'] = record.ref[:20]
         if record.partner_id.email:
             conflux_dte['cliente_email'] = record.partner_id.email
+        if record.invoice_user_id:
+            conflux_dte['vendedor'] = record.invoice_user_id.name
         if record.narration and record.narration!='':
             conflux_dte['observaciones'] = record.narration
         if record.company_id.l10n_pe_edi_address_type_code and record.company_id.l10n_pe_edi_address_type_code!='0000':
             conflux_dte['establecimiento_anexo'] = record.company_id.l10n_pe_edi_address_type_code
-        if record.invoice_user_id:
-            conflux_dte['vendedor'] = record.invoice_user_id.name
         if record.invoice_payment_term_id:
             conflux_dte['condiciones_de_pago'] = record.invoice_payment_term_id.name
 
@@ -299,13 +280,12 @@ class AccountEdiFormat(models.Model):
             conflux_dte["descuento_tipo"]="02"
             conflux_dte["descuento_base"]=descuento_base
             conflux_dte["descuento_importe"]=descuento_importe_02
-            conflux_dte["descuento_factor"]=descuento_importe_02/descuento_base
         
         if descuento_importe_03>0:
             conflux_dte["descuento_tipo"]="03"
             conflux_dte["descuento_base"]=descuento_base
             conflux_dte["descuento_importe"]=descuento_importe_03
-            conflux_dte["descuento_factor"]=descuento_importe_03/descuento_base
+
 
         if record.l10n_latam_document_type_id.code=='07':
             conflux_dte['tipo_de_nota_de_credito'] = record.l10n_pe_edi_refund_reason
@@ -334,7 +314,7 @@ class AccountEdiFormat(models.Model):
             })
 
         #spot = record._l10n_pe_edi_get_spot()
-        
+        #total_retention_min = conflux_dte['total'] if conflux_dte['moneda']=='PEN' else conflux_dte['total']*conflux_dte['tipo_de_cambio']
         retention = record._l10n_pe_edi_get_retention()
         if retention and retention['retention_amount']>0:
             conflux_dte["retencion_tipo"]=retention['retention_type']
@@ -394,30 +374,11 @@ class AccountEdiFormat(models.Model):
         # Chatter.
         documents_xml = []
         documents = []
-        '''if res.get('xml_url'):
-            documents_xml.append(('%s.xml' % edi_filename, res['xml_url']))
-        if res.get('cdr_url'):
-            documents.append(('CDR-%s.xml' % edi_filename, res['cdr_url']))
-        if res.get('pdf_url'):
-            documents.append(('%s.pdf' % edi_filename, res['pdf_url']))'''
         if res.get('xml_attachment_id'):
-            '''zip_edi_str = self._l10n_pe_edi_zip_edi_document(documents)
-            res['attachment'] = self.env['ir.attachment'].create({
-                'res_model': invoice._name,
-                'res_id': invoice.id,
-                'type': 'binary',
-                'name': '%s.zip' % edi_filename,
-                'datas': base64.encodebytes(zip_edi_str),
-                'mimetype': 'application/zip',
-            })'''
-            #edit_attachment_xml_id = self._l10n_pe_edi_pse_create_attachment(documents_xml)
             res['attachment'] = self.env['ir.attachment'].browse(res['xml_attachment_id'])
-
-            #edi_attachment_ids = self._l10n_pe_edi_pse_create_attachment(documents+edit_attachment_xml_id)
             message = _("The EDI document was successfully created and signed by the government.")
             invoice.with_context(no_new_invoice=True).message_post(
                 body=message,
-                #attachment_ids=edi_attachment_ids,
             )
 
         return res
@@ -479,6 +440,7 @@ class AccountEdiFormat(models.Model):
         if not latam_invoice_type:
             return {invoice: {'error': _("Missing LATAM document code.")}}
 
+        log.info("ENVIO DE COMPROBANTE %s DE EMPRESA: %s" % (invoice.id, invoice.company_id.name))
         res = self._l10n_pe_edi_post_invoice_web_service_pse(invoice, edi_filename, edi_str)
 
         return {invoice: res}
@@ -522,7 +484,7 @@ class AccountEdiFormat(models.Model):
             if result['message'] == 'no-credit':
                 error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
             else:
-                error_message = '%s - [LOG: %s]' % (result['message'], json.dumps(result))
+                error_message = result['message']
             return {'error': error_message, 'blocking_level': 'error'}
 
         xml_url = None
@@ -538,14 +500,12 @@ class AccountEdiFormat(models.Model):
                 pdf_url = result['success']['data']['enlace_del_pdf']
             if result['success']['data'].get('emision_aceptada', False):
                 edi_status = 'accepted'
-                success = True
                 if result['success']['data'].get('enlace_del_cdr', False):
                     cdr_url = result['success']['data']['enlace_del_cdr']
             if result['success']['data'].get('emision_rechazada', False):
                 log.info(data_dict)
                 edi_status = 'rejected'
                 success = True
-                error_message = result['success']['data']['sunat_description']
                 
             return {
                 'success':success,
@@ -553,10 +513,9 @@ class AccountEdiFormat(models.Model):
                 'xml_url':xml_url,
                 'pdf_url':pdf_url,
                 'cdr_url':cdr_url,
-                'pse_status': edi_status,
-                'extra_msg': error_message if edi_status == 'rejected' else ''
+                'pse_status': edi_status
             }
-        extra_msg = error_message
+        extra_msg = result.get('message','')
         return {'xml_url': xml_url, 'cdr_url': cdr_url, 'extra_msg': extra_msg}
     
     def _l10n_pe_edi_pse_cancel_invoices_step_1_conflux(self, company, invoice):

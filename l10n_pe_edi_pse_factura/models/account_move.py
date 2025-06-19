@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models, _
+from odoo.tools.sql import column_exists, create_column, drop_index, index_exists
+from odoo.exceptions import ValidationError
 from odoo.tools import float_round
 
 import logging
@@ -8,6 +9,23 @@ log = logging.getLogger(__name__)
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
+
+    def _auto_init(self):
+        res = super()._auto_init()
+        if index_exists(self.env.cr, "account_move_unique_name_latam"):
+            drop_index(self.env.cr, "account_move_unique_name", self._table)
+            drop_index(self.env.cr, "account_move_unique_name_latam", self._table)
+            self.env.cr.execute("""
+                CREATE UNIQUE INDEX account_move_unique_name
+                                 ON account_move(name, journal_id)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
+                CREATE UNIQUE INDEX account_move_unique_name_latam
+                                 ON account_move(name, journal_id, l10n_latam_document_type_id, company_id)
+                              WHERE (state = 'posted' AND name != '/'
+                                AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
+            """)
+        return res
 
     l10n_pe_edi_pse_uid = fields.Char(string='PSE Unique identifier', copy=False)
     l10n_pe_edi_pse_cancel_uid = fields.Char(string='PSE Identifier for Cancellation', copy=False)
@@ -53,6 +71,28 @@ class AccountMove(models.Model):
     l10n_pe_edi_show_cancel_button = fields.Boolean(compute='_compute_edi_show_cancel_button2')
     l10n_pe_edi_show_reset_to_draft_button = fields.Boolean(compute='_compute_edi_show_reset_to_draft_button')
 
+    @api.constrains('name', 'company_id', 'move_type')
+    def _prevent_invoices_with_same_edi_filename(self):
+        for invoice in self.filtered(
+            lambda m: (
+                m.is_sale_document(include_receipts=True)
+                and m.country_code == 'PE'
+                and m.name not in (False, '/')
+            )
+        ):
+            if self.search_count(
+                [
+                    ('country_code', '=', 'PE'),
+                    ('move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']),
+                    ('l10n_latam_document_type_id', '=', invoice.l10n_latam_document_type_id.id),
+                    ('name', '=', invoice.name),
+                    ('company_id.vat', '=', invoice.company_id.vat),
+                    ('id', '!=', invoice.id),
+                ],
+                limit=1,
+            ):
+                raise ValidationError(_('An invoice with the same sequence already exists. Please give this invoice a different sequence.'))
+
     def _compute_l10n_pe_edi_links(self):
         for move in self:
             move.l10n_pe_edi_xml_file_link = move.l10n_pe_edi_xml_file.url if move.l10n_pe_edi_xml_file else None
@@ -68,6 +108,18 @@ class AccountMove(models.Model):
             self.env.ref('account_edi.ir_cron_edi_network')._trigger()
         return res
     
+    
+    def _get_last_sequence_domain(self, relaxed=False):
+        where_string, param = super()._get_last_sequence_domain(relaxed=relaxed)
+        log.info('where_string: %s', where_string)
+        log.info('param: %s', param)
+        if self.l10n_pe_edi_is_required:
+            where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s"
+            param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
+            if not relaxed:
+                param['anti_regex'] = 'NULL'''
+        return where_string, param
+    
     def _get_starting_sequence(self):
         # OVERRIDE
         if self.l10n_pe_edi_is_required and self.l10n_latam_document_type_id:
@@ -79,7 +131,7 @@ class AccountMove(models.Model):
             return "%s %s-00000000" % (self.l10n_latam_document_type_id.doc_code_prefix, middle_code)
 
         return super()._get_starting_sequence()
-
+    
     def _l10n_pe_edi_get_retention(self):
         self.ensure_one()
         percent = 3 if self.partner_id.l10n_pe_edi_retention_type=='01' else 6
@@ -102,61 +154,46 @@ class AccountMove(models.Model):
         if self.amount_total_signed<700:
             return {}
         return res
-
+    
     def l10n_pe_edi_compute_fees(self):
-        self.l10n_pe_edi_payment_fee_ids.unlink()
-        spot = self._l10n_pe_edi_get_spot()
-        spot_amount = 0
+        invoice = self
+        spot = invoice._l10n_pe_edi_get_spot()
         if spot:
-            spot_amount = spot['amount'] if self.currency_id == self.company_id.currency_id else spot['spot_amount']
-        retention = self._l10n_pe_edi_get_retention()
-        retention_amount = 0
+            spot_amount = spot['amount'] if invoice.currency_id == invoice.company_id.currency_id else spot['spot_amount']
+        retention = invoice._l10n_pe_edi_get_retention()
         if retention:
-            retention_amount = retention['amount'] if self.currency_id == self.company_id.currency_id else retention['retention_amount']
-        free_amount = 0
-        for subtotal in self.tax_totals['groups_by_subtotal']['Subtotal']:
-            if subtotal['tax_group_name']=='GRA':
-                free_amount+=subtotal['tax_group_amount']+subtotal['tax_group_base_amount']
+            retention_amount = retention['amount'] if invoice.currency_id == invoice.company_id.currency_id else retention['retention_amount']
         invoice_date_due_vals_list = []
-        deduction = spot_amount + retention_amount + free_amount
-        sign = 1 if self.is_inbound(include_receipts=True) else -1
-        tax_amount_currency = self.amount_tax * sign
-        tax_amount = self.amount_tax
-        untaxed_amount_currency = self.amount_untaxed * sign - deduction
-        untaxed_amount = self.amount_untaxed - deduction
-
-        if untaxed_amount>0 and self.move_type == 'out_invoice':
-            if self.invoice_payment_term_id:
-                invoice_payment_terms = self.invoice_payment_term_id._compute_terms(
-                    date_ref=self.invoice_date or self.date or fields.Date.context_today(self),
-                    currency=self.currency_id,
-                    tax_amount_currency=tax_amount_currency,
-                    tax_amount=tax_amount,
-                    untaxed_amount_currency=untaxed_amount_currency,
-                    untaxed_amount=untaxed_amount,
-                    company=self.company_id,
-                    cash_rounding=self.invoice_cash_rounding_id,
-                    sign=sign
-                )
-                for term_line in invoice_payment_terms['line_ids']:
-                    due_date = fields.Date.to_date(term_line.get('date'))
-                    if due_date > self.invoice_date:
-                        invoice_date_due_vals_list.append([0, 0, {
-                            'amount_total': term_line['company_amount'],
-                            'currency_id': self.currency_id.id,
-                            'date_due': due_date
-                        }])
-            else:
-                if self.invoice_date_due and self.invoice_date_due > self.invoice_date:
-                    invoice_date_due_vals_list.append([0, 0, {
-                        'amount_total': self.amount_total_signed,
-                        'currency_id': self.currency_id.id,
-                        'date_due': self.invoice_date_due
-                    }])
-
-            self.write({
-                'l10n_pe_edi_payment_fee_ids': invoice_date_due_vals_list
+        first_time = True
+        for rec_line in invoice.line_ids.filtered(lambda l: l.account_type == 'asset_receivable'):
+            amount = rec_line.amount_currency
+            if spot and first_time:
+                amount -= spot_amount
+            if retention and first_time:
+                amount -= retention_amount
+            first_time = False
+            invoice_date_due_vals_list.append({
+                'currency_name': rec_line.currency_id.name,
+                'currency_dp': rec_line.currency_id.decimal_places,
+                'amount': amount,
+                'date_maturity': rec_line.date_maturity,
             })
+        payment_means_id = invoice._l10n_pe_edi_get_payment_means()
+        vals = []
+
+        if invoice.move_type=='out_invoice':
+            l10n_pe_edi_payment_fee_ids = []
+            if payment_means_id != 'Contado':
+                for i, due_vals in enumerate(invoice_date_due_vals_list):
+                    l10n_pe_edi_payment_fee_ids.append([0,0,{
+                        'amount_total': due_vals['amount'],
+                        'currency_id': invoice.currency_id.id,
+                        'date_due': due_vals['date_maturity'],
+                    }])
+            self.write({
+                'l10n_pe_edi_payment_fee_ids': l10n_pe_edi_payment_fee_ids
+            })
+        return vals
 
     def _retry_edi_documents_error_hook(self):
         for move in self.filtered(lambda m: m.l10n_pe_edi_pse_uid and (m.l10n_pe_edi_pse_status=='ask_for_status')):
@@ -261,7 +298,6 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    l10n_pe_edi_allowance_charge_reason_code = fields.Selection(selection_add=[('03','Descuentos globales que no afectan la base imponible del IGV/IVAP'),('40', 'Anticipo de ISC')])
     l10n_pe_edi_downpayment_line = fields.Boolean('Is Downpayment?', store=True, default=False)
     l10n_pe_edi_downpayment_invoice_id = fields.Many2one('account.move', string='Downpayment Invoice', store=True, readonly=True, help='Invoices related to the advance regualization')
     l10n_pe_edi_downpayment_ref_type = fields.Selection([('02','Factura'),('03','Boleta de venta')], string='Downpayment Ref. Type')

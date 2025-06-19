@@ -16,6 +16,8 @@
                             <field name="l10n_pe_edi_pse_client_id"/>
                             <label for="l10n_pe_edi_pse_secret_key" class="col-md-5 o_light_label"/>
                             <field name="l10n_pe_edi_pse_secret_key" password="True"/>
+                            <label for="l10n_pe_edi_pse_use_pdf_format" class="col-md-5 o_light_label"/>
+                            <field name="l10n_pe_edi_pse_use_pdf_format"/>
                         </div>
                     </div>
                 </setting>

@@ -77,17 +77,17 @@
                 </button>
             </div>
 
-            <xpath expr="//field[@name='line_ids']/tree/field[@name='product_id']" position="after">
+            <xpath expr="//field[@name='line_ids']/list/field[@name='product_id']" position="after">
                 <field name="l10n_pe_dam_ds_code"/>
             </xpath>
             <notebook position="inside">
                 <page string="Documentos relacionados" name="pe_related_documents">
                     <field name="l10n_pe_edi_reference_ids" readonly="state != 'draft'">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="partner_id"/>
                             <field name="l10n_latam_document_type_id"/>
                             <field name="l10n_latam_document_number"/>
-                        </tree>
+                        </list>
                     </field>
                 </page>
                 <page string="Informacion Extra">
