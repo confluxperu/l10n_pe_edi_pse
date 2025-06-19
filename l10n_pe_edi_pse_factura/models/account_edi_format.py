@@ -183,7 +183,7 @@ class AccountEdiFormat(models.Model):
                 igv_amount = 0
                 isc_amount = 0
                 icbper_amount = 0
-
+                log.info(invoice_line['tax_total_vals'])
                 for tax_total in invoice_line['tax_total_vals']:
                     for tax in tax_total['tax_subtotal_vals']:
                         if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
@@ -221,6 +221,11 @@ class AccountEdiFormat(models.Model):
 
                     valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                    if float_round(line.price_total, precision_digits=price_precision)==0.0 and is_free:
+                        if igv_type=='10':
+                            precio_unitario = valor_unitario
+                        else:
+                            precio_unitario = valor_unitario
                     if line.discount==100:
                         '''
                         taxes_res = line.tax_ids.compute_all(
