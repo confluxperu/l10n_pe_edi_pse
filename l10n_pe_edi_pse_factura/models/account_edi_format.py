@@ -219,21 +219,12 @@ class AccountEdiFormat(models.Model):
                     if line.product_id.type=='service':
                         default_uom = 'ZZ'
 
-                    valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
-                    precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                    edi_price_values = line._prepare_edi_vals_to_export()
+
+                    valor_unitario = float_round(edi_price_values['price_subtotal_unit'], precision_digits=price_precision)
+                    precio_unitario = float_round(edi_price_values['price_total_unit'], precision_digits=price_precision)
                     if line.discount==100:
-                        '''
-                        taxes_res = line.tax_ids.compute_all(
-                            line.price_unit,
-                            quantity=1,
-                            currency=line.currency_id,
-                            product=line.product_id,
-                            partner=line.partner_id,
-                            is_refund=line.is_refund,
-                        )
-                        precio_unitario = taxes_res['total_included']
-                        valor_unitario = taxes_res['total_excluded']
-                        '''
+                        
                         precio_unitario = line.price_unit
                         valor_unitario = line.price_unit
                         if igv_type=='10':
