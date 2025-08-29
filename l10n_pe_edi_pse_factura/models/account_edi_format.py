@@ -108,6 +108,7 @@ class AccountEdiFormat(models.Model):
             "tipo_de_comprobante": record.l10n_latam_document_type_id.code,
             "serie": dte_serial,
             "numero": dte_number,
+            "serie_numero": invoice_sequence,
             "forma_de_pago_credito":False,
             "credito_cuotas":[],
             "moneda": record.currency_id.name,
