@@ -295,6 +295,19 @@ class AccountMove(models.Model):
                 )
                 docs.edi_format_id._l10n_pe_edi_sign_invoices_conflux(rec, edi_filename, '')
 
+    def action_l10n_pe_edi_pse_sync(self):
+        for rec in self:
+            if not rec.l10n_pe_edi_pse_uid:
+                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('to_send',))
+                edi_filename = '%s-%s-%s' % (
+                    rec.company_id.vat,
+                    rec.l10n_latam_document_type_id.code,
+                    rec.name.replace(' ', ''),
+                )
+                response = docs.edi_format_id._l10n_pe_edi_sync_invoices_conflux(rec, edi_filename, '')
+                if response.get('uid'):
+                    rec.edi_document_ids.filtered(lambda doc: doc.state == 'to_send').write({'state': 'sent', 'error': False, 'blocking_level': False})
+
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 

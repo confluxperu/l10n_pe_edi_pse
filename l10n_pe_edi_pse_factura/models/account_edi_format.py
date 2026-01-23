@@ -19,8 +19,9 @@ import logging
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFLUX_FACTURA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/'
-DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'http://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
+DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
 DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/void/'
+DEFAULT_CONFLUX_SEARCH_FACTURA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/buscar/'
 
 def request_json(token="", method="post", url=None, data_dict=None):
     s = requests.Session()
@@ -331,6 +332,35 @@ class AccountEdiFormat(models.Model):
                 })
         return conflux_dte
 
+    def _l10n_pe_edi_sync_invoices_conflux(self, invoice, edi_filename, edi_str=''):
+        if self.code != 'pe_pse':
+            return {'error': 'Para envio a SUNAT mediante PSE el diario debe tener tener activo el campo Facturacion Electronica como "Peru PSE"', 'blocking_level': 'warning'}
+        if invoice.l10n_pe_edi_pse_uid:
+            service_iap = self._l10n_pe_edi_sync_service_conflux(
+                invoice.company_id, invoice)
+        if service_iap.get('extra_msg'):
+            invoice.message_post(body=service_iap['extra_msg'])
+        update_invoice = {}
+        if service_iap.get('pse_status', False):
+            update_invoice['l10n_pe_edi_pse_status'] = service_iap.get('pse_status')
+        if service_iap.get('uid', False):
+            update_invoice['l10n_pe_edi_pse_uid'] = service_iap.get('uid')
+        if not invoice.l10n_pe_edi_pse_uid:
+            if service_iap.get('xml_url'):
+                attachment_xml_id = self._l10n_pe_edi_pse_create_attachment([('%s.xml' % edi_filename, service_iap['xml_url'], invoice.company_id)])
+                update_invoice['l10n_pe_edi_xml_file'] = attachment_xml_id[0]
+                service_iap['xml_attachment_id'] = update_invoice['l10n_pe_edi_xml_file']
+            if service_iap.get('pdf_url'):
+                attachment_pdf_id = self._l10n_pe_edi_pse_create_attachment([('%s.pdf' % edi_filename, service_iap['pdf_url'], invoice.company_id)])
+                update_invoice['l10n_pe_edi_pdf_file'] = attachment_pdf_id[0]
+        if update_invoice.get('l10n_pe_edi_pse_status', False) in ('accepted','objected'):
+            if service_iap.get('cdr_url'):
+                attachment_cdr_id = self._l10n_pe_edi_pse_create_attachment([('CDR-%s.xml' % edi_filename, service_iap['cdr_url'], invoice.company_id)])
+                update_invoice['l10n_pe_edi_cdr_file'] = attachment_cdr_id[0]
+        if update_invoice:
+            invoice.write(update_invoice)
+        return service_iap
+
     def _l10n_pe_edi_sign_invoices_conflux(self, invoice, edi_filename, edi_str=''):
         if self.code != 'pe_pse':
             return {'error': 'Para envio a SUNAT mediante PSE el diario debe tener tener activo el campo Facturacion Electronica como "Peru PSE"', 'blocking_level': 'warning'}
@@ -383,6 +413,60 @@ class AccountEdiFormat(models.Model):
             )
 
         return res
+
+    def _l10n_pe_edi_sync_service_conflux(self, company, invoice):
+        try:
+            invoice_sequence = invoice.name.replace(' ','').split('-')
+            dte_serial = ''
+            dte_number = ''
+            if len(invoice_sequence)==2:
+                dte_serial = invoice_sequence[0]
+                dte_number = invoice_sequence[1]
+            data = {
+                "tipo_de_comprobante":invoice.l10n_latam_document_type_id.code,
+                "fecha_de_emision":invoice.invoice_date.strftime('%Y-%m-%d'),
+                "serie":dte_serial,
+                "numero":int(dte_number)
+            }
+            result = request_json(url=DEFAULT_CONFLUX_SEARCH_FACTURA_ENDPOINT, method='post', token=company.l10n_pe_edi_pse_secret_key, data_dict=data)
+        except InvalidSchema:
+            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE16'], 'blocking_level': 'error'}
+        except AccessError:
+            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
+        except InvalidURL:
+            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
+
+        if result.get('message') and result.get('status')=='error':
+            if result['message'] == 'no-credit':
+                error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
+            else:
+                error_message = 'Error al consultar estado de documento: %s' % result['message']
+            return {'error': error_message, 'blocking_level': 'error'}
+
+        xml_url = None
+        cdr_url = None
+        pdf_url = None
+        success = False
+        extra_msg = ''
+        edi_status = 'ask_for_status'
+        if result.get('emision_aceptada', False):
+            edi_status = 'accepted'
+            success = True
+            if result.get('enlace_del_cdr', False):
+                cdr_url = result['enlace_del_cdr']
+        if result.get('emision_rechazada', False):
+            extra_msg = '%s - %s' % (result.get('sunat_description', ''), result.get('sunat_note', '')), 
+            edi_status = 'rejected'
+            success = True
+            
+        return {
+            'success':success,
+            'xml_url':xml_url,
+            'pdf_url':pdf_url,
+            'cdr_url':cdr_url,
+            'pse_status': edi_status,
+            'extra_msg': extra_msg
+        }
 
     def _l10n_pe_edi_sign_service_step_2_conflux(self, company, uid_invoice):
         try:
