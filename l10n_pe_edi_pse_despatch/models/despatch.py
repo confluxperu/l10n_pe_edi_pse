@@ -116,17 +116,13 @@ class LogisticDespatch(models.Model):
 
     @api.onchange('origin_address_id')
     def _onchange_origin_address_id(self):
-        if self.origin_address_id and self.l10n_pe_edi_shipment_reason=='04':
+        if self.origin_address_id and self.l10n_pe_edi_shipment_reason=='04' and not self.l10n_pe_edi_origin_branch_code:
             self.l10n_pe_edi_origin_branch_code = self.origin_address_id.l10n_pe_edi_address_type_code
-        else:
-            self.l10n_pe_edi_origin_branch_code = ''
 
     @api.onchange('delivery_address_id')
     def _onchange_delivery_address_id(self):
-        if self.delivery_address_id and self.l10n_pe_edi_shipment_reason=='04':
+        if self.delivery_address_id and self.l10n_pe_edi_shipment_reason=='04' and not self.l10n_pe_edi_delivery_branch_code:
             self.l10n_pe_edi_delivery_branch_code = self.delivery_address_id.l10n_pe_edi_address_type_code
-        else:
-            self.l10n_pe_edi_delivery_branch_code = ''
 
     def _compute_l10n_pe_edi_links(self):
         for move in self:
