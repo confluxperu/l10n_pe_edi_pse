@@ -335,9 +335,11 @@ class AccountEdiFormat(models.Model):
     def _l10n_pe_edi_sync_invoices_conflux(self, invoice, edi_filename, edi_str=''):
         if self.code != 'pe_pse':
             return {'error': 'Para envio a SUNAT mediante PSE el diario debe tener tener activo el campo Facturacion Electronica como "Peru PSE"', 'blocking_level': 'warning'}
-        if invoice.l10n_pe_edi_pse_uid:
+        if not invoice.l10n_pe_edi_pse_uid:
             service_iap = self._l10n_pe_edi_sync_service_conflux(
                 invoice.company_id, invoice)
+        else:
+            return {'error': 'El documento ya ha sido enviado a SUNAT', 'blocking_level': 'warning'}
         if service_iap.get('extra_msg'):
             invoice.message_post(body=service_iap['extra_msg'])
         update_invoice = {}
@@ -448,7 +450,15 @@ class AccountEdiFormat(models.Model):
         pdf_url = None
         success = False
         extra_msg = ''
-        edi_status = 'ask_for_status'
+        edi_status = 'not_sent'
+        uid = None
+
+        if result.get('uid', False):
+            uid = result['uid']
+            pdf_url = result['enlace_del_pdf']
+            xml_url = result['enlace_del_xml']
+            edi_status = 'ask_for_status'
+
         if result.get('emision_aceptada', False):
             edi_status = 'accepted'
             success = True
@@ -461,6 +471,7 @@ class AccountEdiFormat(models.Model):
             
         return {
             'success':success,
+            'uid':uid,
             'xml_url':xml_url,
             'pdf_url':pdf_url,
             'cdr_url':cdr_url,
