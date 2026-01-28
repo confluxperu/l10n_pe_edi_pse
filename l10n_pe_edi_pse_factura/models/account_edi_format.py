@@ -278,6 +278,9 @@ class AccountEdiFormat(models.Model):
         if record.invoice_payment_term_id:
             conflux_dte['condiciones_de_pago'] = record.invoice_payment_term_id.name
 
+        if record.l10n_pe_edi_operation_type=='0200' and record.invoice_incoterm_id:
+            conflux_dte['incoterm'] = record.invoice_incoterm_id.code
+
         if descuento_importe_02>0:
             conflux_dte["descuento_tipo"]="02"
             conflux_dte["descuento_base"]=descuento_base
