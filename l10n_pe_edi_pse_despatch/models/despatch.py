@@ -109,6 +109,11 @@ class LogisticDespatch(models.Model):
     l10n_pe_edi_is_carrier_vehicle_and_driver = fields.Boolean(string='Indicador de registro de vehículos y conductores del transportista')
     l10n_pe_edi_transport_event_type = fields.Boolean(string='Tipo de evento')
     l10n_pe_edi_shipment_description = fields.Char(string='Motivo de envio')
+    l10n_pe_edi_traceid_1 = fields.Char(string='Nro. Precinto 1')
+    l10n_pe_edi_container_1 = fields.Char(string='Nro. Contenedor 1')
+    l10n_pe_edi_traceid_2 = fields.Char(string='Nro. Precinto 2')
+    l10n_pe_edi_container_2 = fields.Char(string='Nro. Contenedor 1')
+    l10n_pe_edi_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm')
 
     l10n_pe_edi_invoice_number = fields.Char(string='Numero de Factura')
     l10n_pe_edi_purchase_order = fields.Char(string='Orden de Compra')
@@ -387,6 +392,17 @@ class LogisticDespatch(models.Model):
             _despatch['placa_de_vehiculo_secundario_1'] = self.l10n_pe_edi_vehicle_2.license_plate
         if self.l10n_pe_edi_vehicle_3:
             _despatch['placa_de_vehiculo_secundario_2'] = self.l10n_pe_edi_vehicle_3.license_plate
+
+        if self.l10n_pe_edi_traceid_1:
+            _despatch['numero_de_precinto_1'] = self.l10n_pe_edi_traceid_1
+        if self.l10n_pe_edi_container_1:
+            _despatch['numero_de_contenedor_1'] = self.l10n_pe_edi_container_1
+        if self.l10n_pe_edi_traceid_2:
+            _despatch['numero_de_precinto_2'] = self.l10n_pe_edi_traceid_2
+        if self.l10n_pe_edi_container_2:
+            _despatch['numero_de_contenedor_2'] = self.l10n_pe_edi_container_2
+        if self.l10n_pe_edi_incoterm_id:
+            _despatch['incoterm'] = self.l10n_pe_edi_incoterm_id.code
 
         if self.l10n_pe_edi_reference_ids:
             _despatch['documentos_de_referencia'] = []
