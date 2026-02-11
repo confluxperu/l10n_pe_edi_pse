@@ -19,8 +19,9 @@ import logging
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFLUX_FACTURA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/'
-DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'http://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
-DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/void/'
+DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
+DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/anular/'
+DEFAULT_CONFLUX_VOID_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/einvoice_void/void_ra/%s/'
 
 def request_json(token="", method="post", url=None, data_dict=None):
     s = requests.Session()
@@ -75,13 +76,94 @@ class AccountEdiFormat(models.Model):
             attachment_ids.append(created.id)
         return attachment_ids
 
+    def _generate_edi_invoice_bstr(self, invoice):
+        log.info('***************** _generate_edi_invoice_bstr *****************')
+        res = super()._generate_edi_invoice_bstr(invoice)
+        log.info(res)
+        return res
+
+    def _l10n_pe_edi_get_edi_line_values_conflux(self, line):
+        price_precision = self.env['decimal.precision'].precision_get('Product Price')
+        default_uom = 'NIU'
+        if line.product_id.type=='service':
+            default_uom = 'ZZ'
+
+        igv_type = '10'
+        isc_type = ''
+        is_free = False
+
+        igv_amount = 0
+        isc_amount = 0
+        icbper_amount = 0
+
+        
+
+        taxes_res = line.tax_ids.compute_all(
+                    line.price_unit * (1 - (line.discount / 100.0)),
+                    quantity=line.quantity,
+                    currency=line.currency_id,
+                    product=line.product_id,
+                    partner=line.partner_id,
+                    is_refund=line.is_refund,
+                )
+        for tax_dict in taxes_res['taxes']:
+            tax = line.tax_ids.filtered(lambda x: x.id == tax_dict['id'])
+            if tax.tax_group_id.name == 'IGV':
+                igv_amount+=tax_dict['amount']
+            if tax.tax_group_id.name == 'ISC':
+                isc_type = tax.l10n_pe_edi_isc_type
+                isc_amount+=tax_dict['amount']
+            if tax.tax_group_id.name == 'ICBPER':
+                icbper_amount+=tax_dict['amount']
+            if tax.tax_group_id.name in ('IGV','EXO','INA','EXP','GRA'):
+                igv_type = line.l10n_pe_edi_affectation_reason
+            if tax.tax_group_id.name == 'GRA':
+                is_free = True
+        log.info('***************** taxes_res *****************')
+        log.info(taxes_res)
+        valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+        precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+        if line.discount==100:
+            precio_unitario = line.price_unit
+            valor_unitario = line.price_unit
+            if igv_type=='10':
+                igv_type = '32'
+            is_free = True
+        conflux_line = {
+            "codigo":line.product_id.default_code if line.product_id.default_code else '',
+            "codigo_producto_sunat":line.product_id.unspsc_code_id.code if line.product_id.unspsc_code_id else '',
+            "descripcion":line.name.replace('[%s] ' % line.product_id.default_code,'') if line.product_id else line.name,
+            "cantidad":abs(line.quantity),
+            "unidad_de_medida":line.product_uom_id.l10n_pe_edi_measure_unit_code if line.product_uom_id.l10n_pe_edi_measure_unit_code else default_uom,
+            'valor_unitario': valor_unitario,
+            'precio_unitario': precio_unitario,
+            "subtotal":line.price_subtotal if not is_free else 0,
+            "total":line.price_total if not is_free else icbper_amount,
+            "tipo_de_igv": igv_type,
+            "igv":igv_amount,
+            "isc":isc_amount,
+            "icbper":icbper_amount,
+            "gratuito":is_free,
+        }
+
+        if line.discount>0 and line.discount<100:
+            conflux_line['descuento_tipo']=line.l10n_pe_edi_allowance_charge_reason_code if line.l10n_pe_edi_allowance_charge_reason_code else '00'
+            conflux_line['descuento_factor']=(line.discount or 0.0) / 100.0
+            conflux_line['descuento_base']=line.price_subtotal/(1.0 - conflux_line['descuento_factor'])
+            conflux_line['descuento_importe']=conflux_line['descuento_base'] * conflux_line['descuento_factor']
+
+        if isc_amount>0:
+            conflux_line['tipo_de_calculo_isc'] = isc_type
+        return conflux_line
+
     def _l10n_pe_edi_get_edi_values_conflux(self, invoice):
         price_precision = self.env['decimal.precision'].precision_get('Product Price')
         builder = self.env['account.edi.xml.ubl_pe']
-        invoice_vals = builder._export_invoice_vals(invoice)
-        base_dte = builder._export_invoice_vals(invoice)
+        #base_dte = builder._export_invoice_vals(invoice)
 
-        record = base_dte.get('invoice')
+        sign = invoice.direction_sign
+
+        record = invoice
 
         invoice_sequence = record.name.replace(' ','').split('-')
         
@@ -103,12 +185,11 @@ class AccountEdiFormat(models.Model):
                                 + (record.partner_id.state_id and ', ' + record.partner_id.state_id.name or '') \
                                 + (record.partner_id.country_id and ', ' + record.partner_id.country_id.name or ''),
             "cliente_email": record.partner_id.email if record.partner_id.email else '',
-            "fecha_de_emision": base_dte['vals'].get('issue_date').strftime('%Y-%m-%d'),
+            "fecha_de_emision": invoice.invoice_date.strftime('%Y-%m-%d'),
             "tipo_de_operacion": record.l10n_pe_edi_operation_type,
             "tipo_de_comprobante": record.l10n_latam_document_type_id.code,
             "serie": dte_serial,
             "numero": dte_number,
-            "serie_numero": record.name.replace(' ',''),
             "forma_de_pago_credito":False,
             "credito_cuotas":[],
             "moneda": record.currency_id.name,
@@ -130,7 +211,7 @@ class AccountEdiFormat(models.Model):
             "items": []
         }
 
-        if base_dte['taxes_vals']['base_amount_currency']!=0:
+        '''if base_dte['taxes_vals']['base_amount_currency']!=0:
             conflux_dte['tipo_de_cambio'] = base_dte['taxes_vals']['base_amount']/base_dte['taxes_vals']['base_amount_currency']
 
         if base_dte['vals'].get('payment_terms_vals', []):
@@ -212,18 +293,6 @@ class AccountEdiFormat(models.Model):
                     valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
                     if line.discount==100:
-                        '''
-                        taxes_res = line.tax_ids.compute_all(
-                            line.price_unit,
-                            quantity=1,
-                            currency=line.currency_id,
-                            product=line.product_id,
-                            partner=line.partner_id,
-                            is_refund=line.is_refund,
-                        )
-                        precio_unitario = taxes_res['total_included']
-                        valor_unitario = taxes_res['total_excluded']
-                        '''
                         precio_unitario = line.price_unit
                         valor_unitario = line.price_unit
                         if igv_type=='10':
@@ -261,7 +330,43 @@ class AccountEdiFormat(models.Model):
                         _item['anticipo_tipo_de_documento'] = line.l10n_pe_edi_downpayment_ref_type
                         if line.l10n_pe_edi_downpayment_date:
                             _item['anticipo_fecha'] = line.l10n_pe_edi_downpayment_date.strftime('%Y-%m-%d')
-                    conflux_dte['items'].append(_item)
+                    conflux_dte['items'].append(_item)'''
+
+        for line in invoice.line_ids.filtered(lambda x: x.display_type == "product"):
+            if invoice.is_invoice(True):
+                if any(
+                    tax.l10n_pe_edi_tax_code in ["1000"] for tax in line.tax_ids
+                ):
+                    conflux_dte['total_gravada'] += line.price_subtotal
+                elif any(
+                    tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
+                ):
+                    conflux_dte['total_gratuita'] += line.price_subtotal
+                elif any(
+                    tax.l10n_pe_edi_tax_code in ["9997"] for tax in line.tax_ids
+                ):
+                    conflux_dte['total_exonerada'] += line.price_subtotal
+                elif any(
+                    tax.l10n_pe_edi_tax_code in ["9998"] for tax in line.tax_ids
+                ):
+                    conflux_dte['total_inafecta'] += line.price_subtotal
+
+                conflux_dte['items'].append(self._l10n_pe_edi_get_edi_line_values_conflux(line))
+
+        for line in invoice.line_ids.filtered(lambda x: x.display_type == "tax"):
+            if invoice.is_invoice(True):
+                if line.tax_group_id.name == "IGV":
+                    conflux_dte['total_igv'] += line.amount_currency
+                if line.tax_group_id.name == "ISC":
+                    conflux_dte['total_isc'] += line.amount_currency
+                if line.tax_group_id.name == "ICBPER":
+                    conflux_dte['total_icbper'] += line.amount_currency
+
+        conflux_dte['total_igv'] = sign * conflux_dte['total_igv']
+        conflux_dte['total_isc'] = sign * conflux_dte['total_isc']
+        conflux_dte['total_icbper'] = sign * conflux_dte['total_icbper']
+
+        conflux_dte['total'] = conflux_dte['total_gravada']+conflux_dte['total_igv']+conflux_dte['total_exonerada']+conflux_dte['total_inafecta']+conflux_dte['total_exportacion']+conflux_dte['total_isc']+conflux_dte['total_icbper']
 
 
         if record.ref and record.l10n_latam_document_type_id.internal_type == 'invoice':
@@ -277,7 +382,7 @@ class AccountEdiFormat(models.Model):
         if record.invoice_payment_term_id:
             conflux_dte['condiciones_de_pago'] = record.invoice_payment_term_id.name
 
-        if descuento_importe_02>0:
+        '''if descuento_importe_02>0:
             conflux_dte["descuento_tipo"]="02"
             conflux_dte["descuento_base"]=descuento_base
             conflux_dte["descuento_importe"]=descuento_importe_02
@@ -285,7 +390,7 @@ class AccountEdiFormat(models.Model):
         if descuento_importe_03>0:
             conflux_dte["descuento_tipo"]="03"
             conflux_dte["descuento_base"]=descuento_base
-            conflux_dte["descuento_importe"]=descuento_importe_03
+            conflux_dte["descuento_importe"]=descuento_importe_03'''
 
 
         if record.l10n_latam_document_type_id.code=='07':
@@ -349,6 +454,8 @@ class AccountEdiFormat(models.Model):
             update_invoice['l10n_pe_edi_pse_status'] = service_iap.get('pse_status')
         if service_iap.get('uid', False):
             update_invoice['l10n_pe_edi_pse_uid'] = service_iap.get('uid')
+        if service_iap.get('pse_status_response', False):
+            update_invoice['l10n_pe_edi_pse_status_response'] = service_iap.get('pse_status_response')
         if not invoice.l10n_pe_edi_pse_uid:
             if service_iap.get('xml_url'):
                 attachment_xml_id = self._l10n_pe_edi_pse_create_attachment([('%s.xml' % edi_filename, service_iap['xml_url'], invoice.company_id)])
@@ -407,15 +514,21 @@ class AccountEdiFormat(models.Model):
         success = False
         extra_msg = ''
         edi_status = 'ask_for_status'
+        pse_status_response = ''
         if result.get('emision_aceptada', False):
             edi_status = 'accepted'
             success = True
             if result.get('enlace_del_cdr', False):
                 cdr_url = result['enlace_del_cdr']
+            
         if result.get('emision_rechazada', False):
             extra_msg = '%s - %s' % (result.get('sunat_description', ''), result.get('sunat_note', '')), 
             edi_status = 'rejected'
             success = True
+
+        pse_status_response = result.get('sunat_description', '')
+        if result.get('sunat_note', False):
+            pse_status_response += ' - %s' % result.get('sunat_note', '')
             
         return {
             'success':success,
@@ -423,7 +536,8 @@ class AccountEdiFormat(models.Model):
             'pdf_url':pdf_url,
             'cdr_url':cdr_url,
             'pse_status': edi_status,
-            'extra_msg': extra_msg
+            'extra_msg': extra_msg,
+            'pse_status_response': pse_status_response
         }
 
     def _l10n_pe_edi_sign_invoice_pse(self, invoice):
@@ -492,6 +606,7 @@ class AccountEdiFormat(models.Model):
         cdr_url = None
         pdf_url = None
         success = False
+        pse_status_response = ''
         if result.get('status')=='success':
             edi_status = 'ask_for_status'
             success = True
@@ -507,6 +622,10 @@ class AccountEdiFormat(models.Model):
                 log.info(data_dict)
                 edi_status = 'rejected'
                 success = True
+
+            pse_status_response = result['success']['data'].get('sunat_description', '')
+            if result['success']['data'].get('sunat_note', False):
+                pse_status_response += ' - %s' % result['success']['data'].get('sunat_note', '')
                 
             return {
                 'success':success,
@@ -514,7 +633,8 @@ class AccountEdiFormat(models.Model):
                 'xml_url':xml_url,
                 'pdf_url':pdf_url,
                 'cdr_url':cdr_url,
-                'pse_status': edi_status
+                'pse_status': edi_status,
+                'pse_status_response': pse_status_response
             }
         extra_msg = result.get('message','')
         return {'xml_url': xml_url, 'cdr_url': cdr_url, 'extra_msg': extra_msg}
@@ -522,7 +642,7 @@ class AccountEdiFormat(models.Model):
     def _l10n_pe_edi_pse_cancel_invoices_step_1_conflux(self, company, invoice):
         self.ensure_one()
         try:
-            result = request_json(url=DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT, method='post', token=company.l10n_pe_edi_pse_secret_key, data_dict={'id':invoice.l10n_pe_edi_pse_uid})
+            result = request_json(url=DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='post', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
         except AccessError:
             return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
         except KeyError:
@@ -532,56 +652,113 @@ class AccountEdiFormat(models.Model):
             error_message = result['message']
             return {'error': error_message, 'blocking_level': 'error'}
 
-        void_uid = 'VOID-%s' % invoice.l10n_pe_edi_pse_uid
+        void_uid = 'NO_VOID_UID'
+        if result.get('status')=='success' and result['data'].get('comunicacion_de_baja', False):
+            void_uid = result['data']['comunicacion_de_baja']
 
         edi_void_status = 'ask_for_status'
 
         return {'void_uid': void_uid, 'pse_void_status':edi_void_status}
 
     def _l10n_pe_edi_pse_cancel_invoices_step_2_conflux(self, company, invoice):
-        try:
-            result = request_json(url=DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
-        except KeyError:
-            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
-        except AccessError:
-            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
+        if invoice.l10n_pe_edi_pse_cancel_uid and invoice.l10n_pe_edi_pse_cancel_uid!='NO_VOID_UID':
+            try:
+                result = request_json(url=DEFAULT_CONFLUX_VOID_ENDPOINT % invoice.l10n_pe_edi_pse_cancel_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+            except KeyError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
+            except AccessError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
 
-        if result.get('message') and result.get('status')=='error':
-            if result['message'] == 'no-credit':
-                error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
-            else:
-                error_message = result['message']
-            return {'error': error_message, 'blocking_level': 'error'}
+            if result.get('message') and result.get('status')=='error':
+                if result['message'] == 'no-credit':
+                    error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
+                else:
+                    error_message = result['message']
+                return {'error': error_message, 'blocking_level': 'error'}
 
-        extra_msg = ''
-        edi_void_status = 'ask_for_status'
-        if result.get('baja_aceptada', False):
-            edi_void_status = 'accepted'
-        if result.get('baja_rechazada', False):
-            extra_msg = _('The EDI document failed to be cancelled')
-            edi_void_status = 'rejected'
+            extra_msg = ''
+            xml_url = None
+            cdr_url = None
+            pdf_url = None
+            edi_void_status = 'ask_for_status'
+            pse_void_status_response = ''
+            if result.get('emision_aceptada', False):
+                edi_void_status = 'accepted'
+            if result.get('emision_rechazada', False):
+                extra_msg = result.get('sunat_description', '')
+                if result.get('sunat_note', False):
+                    extra_msg += ' - %s' % result.get('sunat_note', '')
+                edi_void_status = 'rejected'
 
-        return {'success': True, 'cdr': 'CDR-NO-DISPONIBLE','pse_void_status':edi_void_status,'extra_msg': extra_msg}
+            pse_void_status_response = result.get('sunat_description', '')
+            if result.get('sunat_note', False):
+                pse_void_status_response += ' - %s' % result.get('sunat_note', '')
+
+            if result.get('enlace_del_xml', False):
+                xml_url = result['enlace_del_xml']
+            if result.get('enlace_del_pdf', False):
+                pdf_url = result['enlace_del_pdf']
+            if result.get('enlace_del_cdr', False):
+                cdr_url = result['enlace_del_cdr']
+
+            return {
+                'success': True, 
+                'cdr': 'CDR-NO-DISPONIBLE',
+                'pse_void_status':edi_void_status,
+                'pse_void_status_response': pse_void_status_response,
+                'extra_msg': extra_msg,
+                'xml_url': xml_url,
+                'pdf_url': pdf_url,
+                'cdr_url': cdr_url
+            }
+        else:
+            try:
+                result = request_json(url=DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+            except KeyError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
+            except AccessError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
+
+            if result.get('message') and result.get('status')=='error':
+                if result['message'] == 'no-credit':
+                    error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
+                else:
+                    error_message = result['message']
+                return {'error': error_message, 'blocking_level': 'error'}
+
+            extra_msg = ''
+            xml_url = None
+            cdr_url = None
+            pdf_url = None
+            edi_void_status = 'ask_for_status'
+            pse_void_status_response = ''
+            if result.get('baja_aceptada', False):
+                edi_void_status = 'accepted'
+                pse_void_status_response = _('Void accepted by SUNAT - Files cannot be provided')
+            if result.get('baja_rechazada', False):
+                edi_void_status = 'rejected'
+                pse_void_status_response = _('Void rejected by SUNAT - Files cannot be provided')
+
+            return {
+                'success': True, 
+                'cdr': 'CDR-NO-DISPONIBLE',
+                'pse_void_status':edi_void_status,
+                'pse_void_status_response': pse_void_status_response,
+                'extra_msg': extra_msg,
+                'xml_url': xml_url,
+                'pdf_url': pdf_url,
+                'cdr_url': cdr_url
+            }
 
     def _l10n_pe_edi_pse_cancel_invoice_edi_step_1(self, invoice):
         self.ensure_one()
         company = invoice[0].company_id # documents are always batched by company in account_edi.
         provider = company.l10n_pe_edi_provider
 
-        void_filename = '%s-%s-%s' % (
-            invoice.company_id.vat,
-            invoice.l10n_latam_document_type_id.code,
-            invoice.name.replace(' ', ''),
-        )
-
         res = getattr(self, '_l10n_pe_edi_pse_cancel_invoices_step_1_%s' % provider)(company, invoice)
 
         if res.get('error'):
             return {invoice: res}
-
-        if not res.get('void_uid'):
-            error = _("The EDI document failed to be cancelled because the cancellation Void identifier is missing.")
-            return {invoice: {'error': error}}
 
         # Chatter.
         message = _("Cancellation is in progress in the government side (Void identifier: %s).", html_escape(res['void_uid']))
@@ -597,7 +774,10 @@ class AccountEdiFormat(models.Model):
                 #attachment_ids=void_attachment.ids,
             )
 
-        invoice.write({'l10n_pe_edi_pse_cancel_uid': res['void_uid'], 'l10n_pe_edi_pse_void_status':res['pse_void_status']})
+        invoice.write({
+            'l10n_pe_edi_pse_cancel_uid': res['void_uid'], 
+            'l10n_pe_edi_pse_void_status':res['pse_void_status'],
+        })
         #return {invoice: {'error': message, 'blocking_level': 'info'}}
         return {invoice: {'success': True}}
 
@@ -608,6 +788,9 @@ class AccountEdiFormat(models.Model):
 
         res = getattr(self, '_l10n_pe_edi_pse_cancel_invoices_step_2_%s' % provider)(company, invoice)
 
+        log.info('_l10n_pe_edi_pse_cancel_invoice_edi_step_2**************')
+        log.info(res)
+
         if res.get('error'):
             return {invoice: res}
         if not res.get('success'):
@@ -616,6 +799,25 @@ class AccountEdiFormat(models.Model):
 
         # Chatter.
         message = _("The EDI document was successfully cancelled by the government (Void identifier: %s).", html_escape(invoice.l10n_pe_edi_pse_cancel_uid))
+        invoice_update = {
+            'l10n_pe_edi_pse_void_status':res['pse_void_status'],
+            'l10n_pe_edi_pse_void_status_response':res['pse_void_status_response'],
+            'l10n_pe_edi_void_xml_file':res['xml_url'],
+            'l10n_pe_edi_void_pdf_file':res['pdf_url'],
+            'l10n_pe_edi_void_cdr_file':res['cdr_url']
+        }
+
+        if res.get('xml_url') and not invoice.l10n_pe_edi_void_xml_file:
+            attachment_xml_id = self._l10n_pe_edi_pse_create_attachment([('%s.xml' % invoice.l10n_pe_edi_pse_cancel_uid, res['xml_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_xml_file'] = attachment_xml_id[0]
+        if res.get('pdf_url') and not invoice.l10n_pe_edi_void_pdf_file:
+            attachment_pdf_id = self._l10n_pe_edi_pse_create_attachment([('%s.pdf' % invoice.l10n_pe_edi_pse_cancel_uid, res['pdf_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_pdf_file'] = attachment_pdf_id[0]
+        if res.get('cdr_url') and not invoice.l10n_pe_edi_void_cdr_file:
+            attachment_cdr_id = self._l10n_pe_edi_pse_create_attachment([('CDR-%s.xml' % invoice.l10n_pe_edi_pse_cancel_uid, res['cdr_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_cdr_file'] = attachment_cdr_id[0]
+
+        invoice.write(invoice_update)
         invoice.with_context(no_new_invoice=True).message_post(
             body=message,
         )

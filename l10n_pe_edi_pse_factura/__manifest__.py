@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'EDI for Peru with PSE',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'summary': 'Electronic Invoicing for Peru using direct connection with PSE',
     'category': 'Accounting/Localizations/EDI',
     'author': 'Obox',
+    'website': 'https://obox.pe',
     'license': 'Other proprietary',
 'description': """
 Extends EDI Peru Localization

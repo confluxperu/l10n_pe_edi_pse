@@ -134,16 +134,6 @@ msgid "Boleta de venta"
 msgstr ""
 
 #. module: l10n_pe_edi_pse_factura
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_cdr_void_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_cdr_void_file_link
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_move__l10n_pe_edi_cdr_void_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_move__l10n_pe_edi_cdr_void_file_link
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_payment__l10n_pe_edi_cdr_void_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_payment__l10n_pe_edi_cdr_void_file_link
-msgid "CDR Void file"
-msgstr "Archivo CDR de baja"
-
-#. module: l10n_pe_edi_pse_factura
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_cdr_file
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_cdr_file_link
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_move__l10n_pe_edi_cdr_file
@@ -230,11 +220,8 @@ msgstr "Archivo PDF DTE"
 
 #. module: l10n_pe_edi_pse_factura
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_xml_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_bank_statement_line__l10n_pe_edi_xml_file_link
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_move__l10n_pe_edi_xml_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_move__l10n_pe_edi_xml_file_link
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_payment__l10n_pe_edi_xml_file
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_factura.field_account_payment__l10n_pe_edi_xml_file_link
 msgid "DTE file"
 msgstr "Archivo DTE"
 

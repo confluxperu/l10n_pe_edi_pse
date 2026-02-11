@@ -40,6 +40,7 @@ class AccountMove(models.Model):
     - Accepted: The DTE has been accepted by SUNAT.
     - Accepted With Objections: The DTE has been accepted with objections by SUNAT.
     - Rejected: The DTE has been rejected by SUNAT.""")
+    l10n_pe_edi_pse_status_response = fields.Char(string='SUNAT DTE status response', copy=False)
     l10n_pe_edi_pse_void_status = fields.Selection([
         ('ask_for_status', 'Ask For Status'),
         ('accepted', 'Accepted'),
@@ -50,6 +51,7 @@ class AccountMove(models.Model):
     - Accepted: The DTE has been accepted by SUNAT.
     - Accepted With Objections: The DTE has been accepted with objections by SUNAT.
     - Rejected: The DTE has been rejected by SUNAT.""")
+    l10n_pe_edi_pse_void_status_response = fields.Char(string='SUNAT DTE Void status response', copy=False)
     l10n_pe_edi_accepted_by_sunat = fields.Boolean(string='EDI Accepted by Sunat', copy=False)
     l10n_pe_edi_void_accepted_by_sunat = fields.Boolean(string='Void EDI Accepted by Sunat', copy=False)
     l10n_pe_edi_rectification_ref_type = fields.Many2one('l10n_latam.document.type', string='Rectification - Invoice Type')
@@ -61,13 +63,12 @@ class AccountMove(models.Model):
     
     l10n_pe_edi_hash = fields.Char(string='DTE Hash', copy=False)
     l10n_pe_edi_xml_file = fields.Many2one('ir.attachment', string='DTE file', copy=False)
-    l10n_pe_edi_xml_file_link = fields.Char(string='DTE file', compute='_compute_l10n_pe_edi_links')
     l10n_pe_edi_pdf_file = fields.Many2one('ir.attachment', string='DTE PDF file', copy=False)
-    l10n_pe_edi_pdf_file_link = fields.Char(string='DTE PDF file', compute='_compute_l10n_pe_edi_links')
     l10n_pe_edi_cdr_file = fields.Many2one('ir.attachment', string='CDR file', copy=False)
-    l10n_pe_edi_cdr_file_link = fields.Char(string='CDR file', compute='_compute_l10n_pe_edi_links')
-    l10n_pe_edi_cdr_void_file = fields.Many2one('ir.attachment', string='CDR Void file', copy=False)
-    l10n_pe_edi_cdr_void_file_link = fields.Char(string='CDR Void file', compute='_compute_l10n_pe_edi_links')
+    l10n_pe_edi_void_xml_file = fields.Many2one('ir.attachment', string='Void DTE file', copy=False)
+    l10n_pe_edi_void_pdf_file = fields.Many2one('ir.attachment', string='Void DTE PDF file', copy=False)
+    l10n_pe_edi_void_cdr_file = fields.Many2one('ir.attachment', string='Void CDR file', copy=False)
+
     l10n_pe_edi_show_cancel_button = fields.Boolean(compute='_compute_edi_show_cancel_button2')
     l10n_pe_edi_show_reset_to_draft_button = fields.Boolean(compute='_compute_edi_show_reset_to_draft_button')
 
@@ -93,12 +94,55 @@ class AccountMove(models.Model):
             ):
                 raise ValidationError(_('An invoice with the same sequence already exists. Please give this invoice a different sequence.'))
 
-    def _compute_l10n_pe_edi_links(self):
-        for move in self:
-            move.l10n_pe_edi_xml_file_link = move.l10n_pe_edi_xml_file.url if move.l10n_pe_edi_xml_file else None
-            move.l10n_pe_edi_pdf_file_link = move.l10n_pe_edi_pdf_file.url if move.l10n_pe_edi_pdf_file else None
-            move.l10n_pe_edi_cdr_file_link = move.l10n_pe_edi_cdr_file.url if move.l10n_pe_edi_cdr_file else None
-            move.l10n_pe_edi_cdr_void_file_link = move.l10n_pe_edi_cdr_void_file.url if move.l10n_pe_edi_cdr_void_file else None
+    def l10n_pe_edi_pse_action_open_xml_file(self):
+        if not self.l10n_pe_edi_xml_file:
+            raise ValidationError(_('The XML file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_xml_file.url,
+            'target': 'new',
+        }
+    def l10n_pe_edi_pse_action_open_pdf_file(self):
+        if not self.l10n_pe_edi_pdf_file:
+            raise ValidationError(_('The PDF file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_pdf_file.url,
+            'target': 'new',
+        }
+    def l10n_pe_edi_pse_action_open_cdr_file(self):
+        if not self.l10n_pe_edi_cdr_file:
+            raise ValidationError(_('The CDR file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_cdr_file.url,
+            'target': 'new',
+        }
+
+    def l10n_pe_edi_pse_action_open_void_xml_file(self):
+        if not self.l10n_pe_edi_void_xml_file:
+            raise ValidationError(_('The Void XML file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_void_xml_file.url,
+            'target': 'new',
+        }
+    def l10n_pe_edi_pse_action_open_void_pdf_file(self):
+        if not self.l10n_pe_edi_void_pdf_file:
+            raise ValidationError(_('The Void PDF file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_void_pdf_file.url,
+            'target': 'new',
+        }
+    def l10n_pe_edi_pse_action_open_void_cdr_file(self):
+        if not self.l10n_pe_edi_void_cdr_file:
+            raise ValidationError(_('The Void CDR file is not available.'))
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.l10n_pe_edi_void_cdr_file.url,
+            'target': 'new',
+        }
 
     def _post(self, soft=True):
         res = super(AccountMove, self)._post(soft=soft)
@@ -294,6 +338,12 @@ class AccountMove(models.Model):
                     rec.name.replace(' ', ''),
                 )
                 docs.edi_format_id._l10n_pe_edi_sign_invoices_conflux(rec, edi_filename, '')
+
+    def action_l10n_pe_edi_pse_void_status(self):
+        for rec in self:
+            if rec.l10n_pe_edi_pse_void_status=='ask_for_status':
+                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('cancelled',))
+                docs.edi_format_id._l10n_pe_edi_pse_cancel_invoice_edi_step_2(rec)
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'

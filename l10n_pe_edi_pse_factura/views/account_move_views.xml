@@ -6,63 +6,49 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
-                <div class="oe_button_box" position="inside">
-                    <field name="l10n_pe_edi_show_cancel_button" invisible="1"/>
-                    <field name="l10n_pe_edi_show_reset_to_draft_button" invisible="1"/>
-                    <button class="text-danger" icon="fa-check" invisible="edi_state != 'cancelled' or l10n_pe_edi_pse_void_status in ('ask_for_status','accepted','objected') or not l10n_pe_edi_pse_cancel_uid and state != 'cancel'">
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Void Rejected by</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                    <button class="text-success" icon="fa-check" invisible="edi_state != 'cancelled' or l10n_pe_edi_pse_void_status in ('ask_for_status','rejected') or not l10n_pe_edi_pse_cancel_uid and state != 'cancel'">
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Void Accepted by</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                    <button class="text-warning" icon="fa-refresh" invisible="edi_state != 'cancelled' or l10n_pe_edi_pse_void_status in ('rejected','accepted','objected') or not l10n_pe_edi_pse_cancel_uid and state != 'draft'" name="action_retry_edi_documents_error" type="object">
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Get Void Status in</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                    <button class="text-warning" icon="fa-refresh" invisible="edi_state != 'sent' or l10n_pe_edi_pse_status in ('rejected','accepted','objected') or not l10n_pe_edi_pse_uid and state != 'draft'" name="action_l10n_pe_edi_pse_status" type="object">
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Get Status in</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                    <button class="text-danger" icon="fa-times" invisible="edi_state != 'sent' or l10n_pe_edi_pse_status in ('ask_for_status','accepted','objected') or not l10n_pe_edi_pse_uid and state != 'draft'" >
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Rejected by</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                    <button class="text-success" icon="fa-check" invisible="edi_state != 'sent' or l10n_pe_edi_pse_status in ('ask_for_status','rejected') or not l10n_pe_edi_pse_uid and state != 'draft'" >
-                        <div class="o_stat_info">
-                            <span class="o_stat_text">Accepted by</span>
-                            <span class="o_stat_text">SUNAT</span>
-                        </div>
-                    </button>
-                </div>
+                <xpath expr="//div[@id='alerts']" position="after">
+                    <field name="l10n_pe_edi_xml_file" invisible="1"/>
+                    <field name="l10n_pe_edi_pdf_file" invisible="1"/>
+                    <field name="l10n_pe_edi_cdr_file" invisible="1"/>
+                    <field name="l10n_pe_edi_pse_status" invisible="1"/>
+                    <div class="alert alert-success" role="alert" invisible="l10n_pe_edi_pse_status != 'accepted'">
+                        <strong class="alert-title">Registration in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="l10n_pe_edi_pse_action_open_cdr_file" type="object" string="Open CDR File" icon="fa-file-code-o" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="l10n_pe_edi_pse_status != 'rejected'">
+                        <strong class="alert-title">Registration in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="l10n_pe_edi_pse_status != 'ask_for_status'">
+                        <strong class="alert-title">Registration in SUNAT</strong>
+                        <div class="o_row">DTE is being processed by SUNAT <button name="l10n_pe_edi_pse_action_open_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="action_l10n_pe_edi_pse_status" type="object" string="Get Status" icon="fa-refresh" class="btn-link p-1"/></div>
+                    </div>
+                </xpath>
+
+                <xpath expr="//div[@id='alerts']" position="after">
+                    <field name="l10n_pe_edi_pse_void_status" invisible="1"/>
+                    <field name="l10n_pe_edi_void_xml_file" invisible="1"/>
+                    <field name="l10n_pe_edi_void_pdf_file" invisible="1"/>
+                    <field name="l10n_pe_edi_void_cdr_file" invisible="1"/>
+                    <div class="alert alert-success" role="alert" invisible="l10n_pe_edi_pse_void_status != 'accepted'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_void_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="l10n_pe_edi_pse_action_open_void_cdr_file" type="object" string="Open CDR File" icon="fa-file-code-o" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="l10n_pe_edi_pse_void_status != 'rejected'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_void_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="action_l10n_pe_edi_pse_void_status" type="object" string="Get Status" icon="fa-refresh" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="l10n_pe_edi_pse_void_status != 'ask_for_status'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row">Cancellation is being processed by SUNAT <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1" invisible="not l10n_pe_edi_void_xml_file"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1" invisible="not l10n_pe_edi_void_pdf_file"/> <button name="action_l10n_pe_edi_pse_void_status" type="object" string="Get Status" icon="fa-refresh" class="btn-link p-1"/></div>
+                    </div>
+                </xpath>
+                
                 <xpath expr="//button[@name='button_cancel_posted_moves']" position="attributes">
                     <attribute name="invisible">not l10n_pe_edi_show_cancel_button</attribute>
                 </xpath>
                 <xpath expr="//button[@name='button_draft']" position="attributes">
                     <attribute name="invisible">state != 'posted' or not l10n_pe_edi_show_reset_to_draft_button or need_cancel_request</attribute>
-                </xpath>
-                <xpath expr="//field[@name='l10n_pe_edi_cancel_reason']" position="after">
-                    <field name="l10n_pe_edi_pse_uid" readonly="1"/>
-                    <field name="l10n_pe_edi_pse_status" readonly="1"/>
-                    <field name="l10n_pe_edi_pse_void_status" readonly="1"/>
-                    <field name="l10n_pe_edi_pse_cancel_uid" readonly="1"/>
-                    <field name="l10n_pe_edi_accepted_by_sunat" invisible="1"/>
-                    <field name="l10n_pe_edi_void_accepted_by_sunat" invisible="1"/>
-                    <field name="l10n_pe_edi_xml_file_link" widget="url"/>
-                    <field name="l10n_pe_edi_pdf_file_link" widget="url"/>
-                    <field name="l10n_pe_edi_cdr_file_link" widget="url"/>
-                    <field name="l10n_pe_edi_cdr_void_file_link" widget="url"/>
                 </xpath>
                 <xpath expr="//field[@name='l10n_pe_edi_charge_reason']" position="after">
                     <field name="l10n_pe_edi_rectification_ref_type" readonly= "state != 'draft'" />

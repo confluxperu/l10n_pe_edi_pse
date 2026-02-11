@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_logistic_despatch_manager,logistic.logistic.despatch.manager,model_logistic_despatch,l10n_pe_edi_pse_despatch.group_manager,1,1,1,1
+access_logistic_despatch_user,logistic.logistic.despatch.user,model_logistic_despatch,l10n_pe_edi_pse_despatch.group_user,1,1,1,0
+access_logistic_despatch_line_all,logistic.logistic.despatch.line,model_logistic_despatch_line,,1,1,1,1
 access_logistic_despatch_reference_all,logistic.logistic.despatch.all,model_logistic_despatch_reference,,1,1,1,1
