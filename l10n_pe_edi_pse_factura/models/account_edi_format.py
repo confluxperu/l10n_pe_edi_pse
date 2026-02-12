@@ -197,6 +197,9 @@ class AccountEdiFormat(models.Model):
                     isc_amount = 0
                     icbper_amount = 0
 
+                    valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                    precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+
                     for tax_total in invoice_line['tax_total_vals']:
                         for tax in tax_total['tax_subtotal_vals']:
                             if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'IGV':
@@ -210,8 +213,9 @@ class AccountEdiFormat(models.Model):
                                 igv_type = tax['tax_category_vals']['tax_exemption_reason_code']
                             if tax['tax_category_vals']['tax_scheme_vals']['name'] == 'GRA':
                                 is_free = True
-                    valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
-                    precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                                valor_unitario = float_round(tax['taxable_amount']/ abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                                precio_unitario = float_round((tax['taxable_amount'] + tax['tax_amount']) / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
+                    
                     if line.discount==100:
                         '''
                         taxes_res = line.tax_ids.compute_all(
