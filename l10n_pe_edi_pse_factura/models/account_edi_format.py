@@ -109,7 +109,6 @@ class AccountEdiFormat(models.Model):
             "tipo_de_comprobante": record.l10n_latam_document_type_id.code,
             "serie": dte_serial,
             "numero": dte_number,
-            "serie_numero": record.name.replace(' ',''),
             "forma_de_pago_credito":False,
             "credito_cuotas":[],
             "moneda": record.currency_id.name,
@@ -165,7 +164,16 @@ class AccountEdiFormat(models.Model):
                 if tax_subtotal['tax_category_vals']['tax_scheme_vals']['name']=='OTROS':
                     conflux_dte['total_otros_cargos']+=tax_subtotal['tax_amount']
         
+        conflux_dte['total_gravada'] = round(conflux_dte['total_gravada'], 2)
+        conflux_dte['total_igv'] = round(conflux_dte['total_igv'], 2)
+        conflux_dte['total_exonerada'] = round(conflux_dte['total_exonerada'], 2)
+        conflux_dte['total_inafecta'] = round(conflux_dte['total_inafecta'], 2)
+        conflux_dte['total_gratuita'] = round(conflux_dte['total_gratuita'], 2)
+        conflux_dte['total_exportacion'] = round(conflux_dte['total_exportacion'], 2)
+        conflux_dte['total_isc'] = round(conflux_dte['total_isc'], 2)
+        conflux_dte['total_icbper'] = round(conflux_dte['total_icbper'], 2)
         conflux_dte['total'] = conflux_dte['total_gravada']+conflux_dte['total_igv']+conflux_dte['total_exonerada']+conflux_dte['total_inafecta']+conflux_dte['total_exportacion']+conflux_dte['total_isc']+conflux_dte['total_icbper']
+        
 
         descuento_importe_02 = 0
         descuento_importe_03 = 0
