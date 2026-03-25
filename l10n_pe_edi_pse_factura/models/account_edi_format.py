@@ -367,7 +367,14 @@ class AccountEdiFormat(models.Model):
         conflux_dte['total_icbper'] = sign * conflux_dte['total_icbper']
 
         conflux_dte['total'] = conflux_dte['total_gravada']+conflux_dte['total_igv']+conflux_dte['total_exonerada']+conflux_dte['total_inafecta']+conflux_dte['total_exportacion']+conflux_dte['total_isc']+conflux_dte['total_icbper']
-
+        
+        if invoice._l10n_pe_edi_get_spot():
+            spot = invoice._l10n_pe_edi_get_spot()
+            conflux_dte["detraccion"]=True
+            conflux_dte["total_detraccion"]=spot['amount']
+            conflux_dte["porcentaje_detraccion"]=spot['payment_percent']
+            conflux_dte["codigo_detraccion"]=spot['payment_means_id']
+            conflux_dte['medio_de_pago_detraccion']=spot['payment_means_code']
 
         if record.ref and record.l10n_latam_document_type_id.internal_type == 'invoice':
             conflux_dte['orden_compra_servicio'] = record.ref[:20]
