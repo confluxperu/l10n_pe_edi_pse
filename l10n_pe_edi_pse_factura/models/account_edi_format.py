@@ -339,6 +339,10 @@ class AccountEdiFormat(models.Model):
                 ):
                     conflux_dte['total_gravada'] += line.price_subtotal
                 elif any(
+                    tax.l10n_pe_edi_tax_code in ["9995"] for tax in line.tax_ids
+                ):
+                    conflux_dte['total_exportacion'] += line.price_subtotal
+                elif any(
                     tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
                 ):
                     conflux_dte['total_gratuita'] += line.price_subtotal
