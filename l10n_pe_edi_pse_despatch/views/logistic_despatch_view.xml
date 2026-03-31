@@ -13,7 +13,7 @@
                         <field name="state" widget="statusbar" statusbar_visible="draft,open,cancel" statusbar_colors="{&quot;to_fix&quot;:&quot;red&quot;}"/>
                     </header>
                     <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert" invisible="l10n_pe_edi_status != 'not_sent' or state == 'draft'">
-                         <div>The invoice will soon be sent to PSE</div>
+                         <div>The despatch will soon be sent to PSE</div>
                          <button name="l10n_pe_edi_action_send" type="object" class="oe_link py-0 text-decoration-underline" string="Process now"/>
                     </div>
                     <div class="alert alert-warning" role="alert" invisible="state != 'cancel' or not l10n_pe_edi_pse_uid">
@@ -127,6 +127,11 @@
                                     <field name="l10n_pe_edi_is_transport_total_dam_ds" readonly="state != 'draft'"/>
                                     <field name="l10n_pe_edi_is_carrier_vehicle_and_driver" readonly="state != 'draft'"/>
                                     <field name="l10n_pe_edi_shipment_description" readonly="state != 'draft'"/>
+                                    <field name="l10n_pe_edi_traceid_1" readonly="state != 'draft'"/>
+                                    <field name="l10n_pe_edi_container_1" readonly="state != 'draft'"/>
+                                    <field name="l10n_pe_edi_traceid_2" readonly="state != 'draft'"/>
+                                    <field name="l10n_pe_edi_container_2" readonly="state != 'draft'"/>
+                                    <field name="l10n_pe_edi_incoterm_id" readonly="state != 'draft'"/>
                                 </group>
                             </page>
                             <page string="Electronic Despatch" name="pe_electronic_invoice" invisible="l10n_pe_edi_status == False">

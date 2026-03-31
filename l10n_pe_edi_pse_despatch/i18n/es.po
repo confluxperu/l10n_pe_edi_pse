@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 13.0\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-03 05:15+0000\n"
-"PO-Revision-Date: 2021-08-03 05:15+0000\n"
+"POT-Creation-Date: 2026-02-26 18:57+0000\n"
+"PO-Revision-Date: 2026-02-26 18:57+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -25,194 +25,9 @@ msgid ""
 msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid ", visit"
-msgstr ", visita"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model:mail.template,body_html:l10n_pe_edi_pse_despatch.email_template_edi_despatch
-msgid ""
-"<div class=\"o_layout o_default_theme\">\n"
-"                    <table class=\"o_mail_wrapper\">\n"
-"                        <tbody>\n"
-"                        <tr>\n"
-"                            <td class=\"o_mail_no_options o_mail_wrapper_td oe_structure\">\n"
-"                                <div class=\"o_mail_block_title_sub\" data-snippet=\"s_mail_block_title_sub\" data-name=\"Title - Subtitle\">\n"
-"                                    <div class=\"o_mail_snippet_general\">\n"
-"                                    <table class=\"o_mail_table_styles\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\">\n"
-"                                        <tbody>\n"
-"                                        <tr>\n"
-"                                            <td class=\"o_mail_h_padding o_mail_v_padding o_mail_no_colorpicker\">\n"
-"                                            <h2 class=\"o_mail_no_margin o_default_snippet_text\">\n"
-"                                                Electronic Despatch ${object.name or 'n/a'}\n"
-"                                            </h2>\n"
-"                                            <p class=\"o_mail_no_margin o_default_snippet_text\">\n"
-"                                                Dear\n"
-"                                                % if object.partner_id.parent_id:\n"
-"                                                    ${object.partner_id.name} (${object.partner_id.parent_id.name}),\n"
-"                                                % else:\n"
-"                                                    ${object.partner_id.name},\n"
-"                                                % endif\n"
-"                                             </p>\n"
-"                                             <p>\n"
-"                                                Attached to this message is the \n"
-"                                                % if object.name:\n"
-"                                                    Electronic Despatch <strong>${object.name or 'n/a'}</strong>\n"
-"                                                % else:\n"
-"                                                    Despatch\n"
-"                                                %endif\n"
-"                                                % if object.despatch_origin:\n"
-"                                                    (with reference: ${object.despatch_origin})\n"
-"                                                % endif\n"
-"                                            </p>\n"
-"                                            <ul>\n"
-"                                                <li>Date: <strong>${object.issue_date or 'n/a'}</strong></li>\n"
-"                                                <li>Start date: <strong>${object.start_date}</strong></li>\n"
-"                                                <li>Weight: <strong>${object.total_weight or 'n/a'} ${object.weight_uom.name or 'kg'}</strong></li>\n"
-"                                            </ul>\n"
-"                                            <p>\n"
-"                                                The electronic document in PDF and XML formats is attached to this message. \n"
-"                                                The printed representation in PDF has the same validity as one issued in a traditional way.\n"
-"                                            </p>\n"
-"                                            </td>\n"
-"                                        </tr>\n"
-"                                        </tbody>\n"
-"                                    </table>\n"
-"                                    </div>\n"
-"                                </div>                            \n"
-"                            </td>\n"
-"                        </tr>\n"
-"                        </tbody>\n"
-"                    </table>\n"
-"                </div>   \n"
-"            "
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "<strong class=\"alert-title\">Registration in SUNAT</strong>"
 msgstr ""
-"<div class=\"o_layout o_default_theme\">\n"
-"                    <table class=\"o_mail_wrapper\">\n"
-"                        <tbody>\n"
-"                        <tr>\n"
-"                            <td class=\"o_mail_no_options o_mail_wrapper_td oe_structure\">\n"
-"                                <div class=\"o_mail_block_title_sub\" data-snippet=\"s_mail_block_title_sub\" data-name=\"Title - Subtitle\">\n"
-"                                    <div class=\"o_mail_snippet_general\">\n"
-"                                    <table class=\"o_mail_table_styles\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\">\n"
-"                                        <tbody>\n"
-"                                        <tr>\n"
-"                                            <td class=\"o_mail_h_padding o_mail_v_padding o_mail_no_colorpicker\">\n"
-"                                            <h2 class=\"o_mail_no_margin o_default_snippet_text\">\n"
-"                                                Guia de remisión electrónica ${object.name or 'n/a'}\n"
-"                                            </h2>\n"
-"                                            <p class=\"o_mail_no_margin o_default_snippet_text\">\n"
-"                                                Estimados\n"
-"                                                % if object.partner_id.parent_id:\n"
-"                                                    ${object.partner_id.name} (${object.partner_id.parent_id.name}),\n"
-"                                                % else:\n"
-"                                                    ${object.partner_id.name},\n"
-"                                                % endif\n"
-"                                             </p>\n"
-"                                             <p>\n"
-"                                                Adjunto a este mensaje esta la \n"
-"                                                % if object.name:\n"
-"                                                    Guia de Remisión Electrónica <strong>${object.name or 'n/a'}</strong>\n"
-"                                                % else:\n"
-"                                                    Guia\n"
-"                                                %endif\n"
-"                                                % if object.despatch_origin:\n"
-"                                                    (con referencia: ${object.despatch_origin})\n"
-"                                                % endif\n"
-"                                            </p>\n"
-"                                            <ul>\n"
-"                                                <li>Fecha: <strong>${object.issue_date or 'n/a'}</strong></li>\n"
-"                                                <li>Fecha de inicio: <strong>${object.start_date}</strong></li>\n"
-"                                                <li>Peso: <strong>${object.total_weight or 'n/a'} ${object.weight_uom.name or 'kg'}</strong></li>\n"
-"                                            </ul>\n"
-"                                            <p>\n"
-"                                                Se adjunta en este mensaje el documento electrónico en formatos PDF y XML. \n"
-"                                                La representación impresa en PDF puede imprimirse y usarse como una Factura emitida de manera tradicional.\n"
-"                                            </p>\n"
-"                                            </td>\n"
-"                                        </tr>\n"
-"                                        </tbody>\n"
-"                                    </table>\n"
-"                                    </div>\n"
-"                                </div>                            \n"
-"                            </td>\n"
-"                        </tr>\n"
-"                        </tbody>\n"
-"                    </table>\n"
-"                </div>   \n"
-"            "
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form_edi
-msgid ""
-"<span class=\"o_stat_text\">Accepted by</span>\n"
-"                        <span class=\"o_stat_text\">SUNAT</span>"
-msgstr ""
-"<span class=\"o_stat_text\">Aceptado por</span>\n"
-"                        <span class=\"o_stat_text\">SUNAT</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form_edi
-msgid ""
-"<span class=\"o_stat_text\">Check</span>\n"
-"                        <span class=\"o_stat_text\">Status</span>"
-msgstr ""
-"<span class=\"o_stat_text\">Verificar</span>\n"
-"                        <span class=\"o_stat_text\">Estado</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form_edi
-msgid ""
-"<span class=\"o_stat_text\">Send to</span>\n"
-"                        <span class=\"o_stat_text\">SUNAT</span>"
-msgstr ""
-"<span class=\"o_stat_text\">Enviar a</span>\n"
-"                        <span class=\"o_stat_text\">SUNAT</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<span>CODE / DESCRIPTION</span>"
-msgstr "<span>CODIGO / DESCRIPCIÓN</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<span>QTY</span>"
-msgstr "<span>CANT</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<span>UOM</span>"
-msgstr "<span>UDM</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<span>WEIGHT</span>"
-msgstr "<span>PESO</span>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<strong>RECEIVER</strong>"
-msgstr "<strong>DESTINATARIO</strong>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<strong>TOTAL PACKAGES</strong>"
-msgstr "<strong>Total Bultos</strong>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<strong>TOTAL VOLUME</strong>"
-msgstr "<strong>Volumen Total</strong>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "<strong>TOTAL WEIGHT</strong>"
-msgstr "<strong>Peso Total</strong>"
-
-#. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "ADDRESS:"
-msgstr "DIRECCIÓN:"
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_status__accepted
@@ -227,25 +42,56 @@ msgid "Accepted With Objections"
 msgstr "Aceptado con observaciones"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__access_warning
+msgid "Access warning"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_status__ask_for_status
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_void_status__ask_for_status
 msgid "Ask For Status"
 msgstr "Consulta de estado"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "CARRIER:"
-msgstr "TRANSPORTISTA:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_cdr_void_file
-msgid "CDR Void file"
-msgstr "Archivo CDR de baja"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_mtc_authorization
+msgid "Autorizacion MTC"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_cdr_file
-msgid "CDR file"
-msgstr "Archivo CDR"
+#: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__state__cancel
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Cancel"
+msgstr "Anular"
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_cancel_reason
@@ -259,29 +105,85 @@ msgid "Cancelled"
 msgstr "Cancelado"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__carrier_id
+msgid "Carrier"
+msgstr "Transportista"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.actions.act_window,help:l10n_pe_edi_pse_despatch.action_logistic_despatch_tree
+msgid "Clic here to create a logistic despatch."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__partner_id
+msgid "Cliente/Proveedor"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__l10n_pe_dam_ds_code
+msgid "Codigo DAM/DS"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_delivery_branch_code
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_origin_branch_code
+msgid "Codigo Sucursal"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_res_company
+msgid "Companies"
+msgstr "Empresas"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__company_id
+msgid "Company"
+msgstr "Compañia"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_buyer_id
+msgid "Comprador"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "Conflux web service url not provided"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_latam_country_code
 msgid "Country Code (LATAM)"
 msgstr "Código de pais (LATAM)"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "DELIVERY ADDRESS:"
-msgstr "DIRECCIÓN DE LLEGADA"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__create_uid
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__create_uid
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__create_uid
+msgid "Created by"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "DENOMINATION:"
-msgstr "DENOMINACIÓN:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__create_date
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__create_date
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__create_date
+msgid "Created on"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "DESPATCH DATE:"
-msgstr "FECHA:"
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__access_url
+msgid "Customer Portal URL"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "DRIVER:"
-msgstr "CONDUCTOR:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_cdr_file
+msgid "DTE CDR file"
+msgstr "Archivo CDR"
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_hash
@@ -289,33 +191,230 @@ msgid "DTE Hash"
 msgstr "Codigo hash de DTE"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_pdf_file
+msgid "DTE PDF file"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_file
-msgid "DTE file"
+msgid "DTE XML file"
 msgstr "Archivo DTE"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model:mail.template,report_name:l10n_pe_edi_pse_despatch.email_template_edi_despatch
-msgid ""
-"Despatch_${(object.name or '').replace('/','_')}${object.state == 'draft' "
-"and '_draft' or ''}"
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "DTE is being processed by SUNAT"
+msgstr "DTE esta siendo procesada por SUNAT"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__issue_date
+msgid "Date despatch"
+msgstr "Fecha de emisión"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__start_date
+msgid "Date start"
+msgstr "Fecha de inicio"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Delivery"
+msgstr "Llegada"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__delivery_address_id
+msgid "Delivery Address"
+msgstr "Dirección de llegada"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__name
+msgid "Description"
+msgstr "Descripción"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+#: model:ir.actions.act_window,name:l10n_pe_edi_pse_despatch.action_logistic_despatch_tree
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__despatch_id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__despatch_id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_picking__despatch_id
+#: model:ir.ui.menu,name:l10n_pe_edi_pse_despatch.menu_action_logistic_despatch_tree
+msgid "Despatch"
 msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "Electronic Despatch"
-msgstr "Guia de remisión electrónica"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_warehouse__despatch_sequence_ids
+msgid "Despatch (Sequences)"
+msgstr "Guia (Secuencia)"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form_edi
-msgid "Electronic Despatch"
-msgstr "Guia de remisión electrónica"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__despatch_sent
+msgid "Despatch Sent"
+msgstr "Guia enviada"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model:mail.template,subject:l10n_pe_edi_pse_despatch.email_template_edi_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_company__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_move__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_picking__display_name
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_warehouse__display_name
+msgid "Display Name"
+msgstr "Nombre en pantalla"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
 msgid ""
-"Electronic Despatch ${object.name or 'n/a'} | ${object.company_id.name} "
+"Documento cancelado intermanete para control intero, es necesario proceder "
+"con la baja de la guia de remisión electrónica desde clave SOL"
 msgstr ""
-"Guia de remisión electrónica ${object.name or 'n/a'} | ${object.company_id.name} "
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_reference_ids
+msgid "Documentos de referencia"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Documentos relacionados"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__domain_sequence_id
+msgid "Domain Sequence"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__state__draft
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Electronic Despatch"
+msgstr "Guia electrónica"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "Exception decoding JSON response from Conflux: %s "
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_picking_form
+msgid "Generate Despatch"
+msgstr "Generar Guia"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Get Status"
+msgstr "Consultar estado"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Header"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_company__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_config_settings__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_move__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_picking__id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_stock_warehouse__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_error
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__type__in_despatch
+msgid "In Despatch"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_incoterm_id
+msgid "Incoterm"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_carrier_vehicle_and_driver
+msgid "Indicador de registro de vehículos y conductores del transportista"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_return_with_empty_packages
+msgid "Indicador de retorno de vehículo con envases o embalajes vacíos"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_empty_vehicle_return
+msgid "Indicador de retorno de vehículo vacío"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_vehicle_m1_l
+msgid "Indicador de traslado en vehículos de categoría M1 o L"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_transport_total_dam_ds
+msgid "Indicador de traslado total de la DAM o la DS"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Informacion Extra"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__internal_number
+msgid "Internal number"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_is_einvoice
@@ -323,14 +422,63 @@ msgid "Is E-invoice"
 msgstr "Es Comprobante electrónico?"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__despatch_sent
+msgid "It indicates that the despatch has been sent."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__write_uid
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__write_uid
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__write_date
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__write_date
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__line_ids
+msgid "Line"
+msgstr "Linea"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Lines"
+msgstr "Lineas"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.res_config_settings_view_form
+msgid "Logistic"
+msgstr "Logistica"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:res.groups.privilege,name:l10n_pe_edi_pse_despatch.logistic_despatch_group_category
+msgid "Logistic Despatch"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_logistic_despatch_line
+msgid "Logistic Despatch Line"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model,name:l10n_pe_edi_pse_despatch.model_logistic_despatch
 msgid "Logistic Despatchs"
 msgstr "Guias"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "MODE:"
-msgstr "MODALIDAD:"
+#: model:res.groups,name:l10n_pe_edi_pse_despatch.group_manager
+msgid "Manager"
+msgstr "Administrador"
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_status__manual
@@ -339,9 +487,49 @@ msgid "Manual"
 msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_transport_mode
 msgid "Mode"
 msgstr "Modalidad"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_shipment_description
+msgid "Motivo de envio"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_partner_status__not_sent
@@ -349,14 +537,107 @@ msgid "Not Sent"
 msgstr "No enviado"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "OBSERVATIONS:"
-msgstr "OBSERVACIONES:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__note
+msgid "Notes"
+msgstr "Observaciones"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "ORIGIN ADDRESS:"
-msgstr "DIRECCIÓN DE PARTIDA:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_container_1
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_container_2
+msgid "Nro. Contenedor 1"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__l10n_latam_document_number
+msgid "Nro. Documento"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_traceid_1
+msgid "Nro. Precinto 1"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_traceid_2
+msgid "Nro. Precinto 2"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_invoice_number
+msgid "Numero de Factura"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__state__open
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Open"
+msgstr "Emitido"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Open CDR File"
+msgstr "Abrir CDR"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Open PDF File"
+msgstr "Abrir PDF"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Open XML File"
+msgstr "Abrir XML"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_purchase_order
+msgid "Orden de Compra"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__despatch_origin
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Origin"
+msgstr "Partida"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__origin_address_id
+msgid "Origin Address"
+msgstr "Dirección de partida"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__type__out_despatch
+msgid "Out Despatch"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_pse_uid
+msgid "PSE Unique identifier"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__packages
+msgid "Packages"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_partner_status
@@ -370,22 +651,56 @@ msgid "Pending To Be Sent"
 msgstr "Pendiente de ser enviado"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid ""
-"Printed representation of the <span class=\"font-weight-bold text-"
-"uppercase\">Electronic Despatch</span>"
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_mtc_authorization
+msgid "Peru: Ministry of Transport and Communication Registration Number."
 msgstr ""
-"Representación impresa de la <span class=\"font-weight-bold text-"
-"uppercase\">Guia de Remisión Electrónica</span>"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "REASON:"
-msgstr "MOTIVO:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_company__logistic_picking_done_restrict
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_res_config_settings__logistic_picking_done_restrict
+msgid "Picking Done Restriction"
+msgstr "Restricción de albaran validado"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "RUC"
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/stock_picking.py:0
+msgid "Picking status is not done"
+msgstr "El albaran no esta validado"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__picking_ids
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Pickings"
+msgstr "Albaranes"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__access_url
+msgid "Portal Access URL"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "Process now"
+msgstr "Procesar ahora"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__product_id
+msgid "Product"
+msgstr "Producto"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_seller_supplier_id
+msgid "Proveedor"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__quantity
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__rating_ids
+msgid "Ratings"
 msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
@@ -399,15 +714,35 @@ msgid "Reason given by the user to cancel this move"
 msgstr "Motivo de cancelación del documento"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__partner_id
+msgid "Receiver"
+msgstr "Receptor"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__ref
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_status__rejected
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_void_status__rejected
 msgid "Rejected"
 msgstr "Rechazado"
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "START DATE:"
-msgstr "FECHA DE INICIO:"
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_user_id
+msgid "Responsible User"
+msgstr "Responsable"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.res_config_settings_view_form
+msgid "Restrict despatch creation only when picking has done."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_void_status
@@ -420,9 +755,63 @@ msgid "SUNAT DTE status"
 msgstr "Estado de DTE en SUNAT"
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_status_response
+msgid "SUNAT DTE status response"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__despatch_user_id
+msgid "Salesperson"
+msgstr "Comercial"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__access_token
+msgid "Security Token"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields.selection,name:l10n_pe_edi_pse_despatch.selection__logistic_despatch__l10n_pe_edi_partner_status__sent
 msgid "Sent"
 msgstr "Enviado"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__sequence_id
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "Sequence is required to manage the despatch sequence"
+msgstr "Secuencia es obligatoria para administrar correlativos de guia"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__l10n_pe_dam_ds_code
+msgid ""
+"Si el motivo de traslado es IMPORTACIÓN debe registrar el siguiente formato en el formulario del código DAM o DS.\n"
+"        a) Si el tipo de documento relacionado es 50 - Declaración Aduanera de Mercancías el formato sería:\n"
+"        xxxx(serie)/xxx-xxxx-10-xxxxxx(DAM)\n"
+"        Ejemplo: 0001/123-1234-10-123456\n"
+"        b) Si el tipo de documento relacionado es 52 - Declaración Simplificada (DS) el formato sería:\n"
+"        xxxx(serie)/xxx-xxxx-18-xxxxxx(DS)\n"
+"        Ejemplo: 0001/123-1234-18-123456\n"
+"        "
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__state
+msgid "Status"
+msgstr "Estado"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_status
@@ -463,11 +852,155 @@ msgstr ""
 "    - Manual: La baja del DTE es enviado manualmente, e.d.: La baja del DTE no sera enviada manualmente."
 
 #. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_stock_move
+msgid "Stock Move"
+msgstr "Movimiento de stock"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__user_id
+msgid "Technical field used to fit the generic behavior in mail templates."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
 #: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_latam_country_code
 msgid "Technical field used to hide/show fields regarding the localization"
 msgstr ""
 
 #. module: l10n_pe_edi_pse_despatch
-#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.report_despatch_document
-msgid "VEHICLE:"
-msgstr "VEHICULO:"
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "The CDR file is not available."
+msgstr "El archivo CDR no esta disponible"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "The PDF file is not available."
+msgstr "El archivo PDF no esta disponible"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "The XML file is not available."
+msgstr "El archivo XML no esta disponible"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__despatch_origin
+msgid "The document(s) that generated the despatch."
+msgstr "Los documento(s) que generaron la guia"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_pse_despatch.view_logistic_despatch_form
+msgid "The despatch will soon be sent to PSE"
+msgstr "La guia se enviara pronto a PSE"
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/despatch.py:0
+msgid "There's problems to connecte with Conflux Server"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#. odoo-python
+#: code:addons/l10n_pe_edi_pse_despatch/models/stock_picking.py:0
+msgid "This document already has a remission guide"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_reference__l10n_latam_document_type_id
+msgid "Tipo de documento"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_transport_event_type
+msgid "Tipo de evento"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_stock_picking
+msgid "Transfer"
+msgstr "Transferir"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__type
+msgid "Type"
+msgstr "Tipo"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__type_name
+msgid "Type Name"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__uom_id
+msgid "UoM"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__weight_uom
+msgid "UoM of weight"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__user_id
+#: model:res.groups,name:l10n_pe_edi_pse_despatch.group_user
+msgid "User"
+msgstr "Usuario"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__driver_id
+msgid "Vehicle Driver"
+msgstr "Operador"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_vehicle_1
+msgid "Vehiculo Primario"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_vehicle_2
+msgid "Vehiculo Secundario 1"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__l10n_pe_edi_vehicle_3
+msgid "Vehiculo Secundario 2"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__total_volume
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__volume
+msgid "Volume"
+msgstr "Volumen"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_stock_warehouse
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__warehouse_id
+msgid "Warehouse"
+msgstr "Almacén"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,help:l10n_pe_edi_pse_despatch.field_logistic_despatch__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch__total_weight
+#: model:ir.model.fields,field_description:l10n_pe_edi_pse_despatch.field_logistic_despatch_line__weight
+msgid "Weight"
+msgstr "Peso"
+
+#. module: l10n_pe_edi_pse_despatch
+#: model:ir.model,name:l10n_pe_edi_pse_despatch.model_logistic_despatch_reference
+msgid "logistic.despatch.reference"
+msgstr ""
