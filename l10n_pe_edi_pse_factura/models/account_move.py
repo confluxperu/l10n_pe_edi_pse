@@ -21,7 +21,7 @@ class AccountMove(models.Model):
                               WHERE (state = 'posted' AND name != '/'
                                 AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
                 CREATE UNIQUE INDEX account_move_unique_name_latam
-                                 ON account_move(name, journal_id, l10n_latam_document_type_id, company_id)
+                                 ON account_move(name, commercial_partner_id, journal_id, l10n_latam_document_type_id, company_id)
                               WHERE (state = 'posted' AND name != '/'
                                 AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
             """)
