@@ -49,7 +49,7 @@ class LogisticDespatch(models.Model):
     start_date = fields.Date(string='Date start', copy=True )
     company_id = fields.Many2one('res.company', string='Company', change_default=True,
                                  required=True, readonly=True, states={'draft': [('readonly', False)]},
-                                 default=lambda self: self.env['res.company']._company_default_get('logistic.despatch'))
+                                 default=lambda self: self.env.company)
     partner_id = fields.Many2one('res.partner', string='Receiver')
     sequence_id = fields.Many2one('ir.sequence', string='Sequence')
     domain_sequence_id = fields.Many2many('ir.sequence', compute='_compute_domain_sequence_id')
@@ -490,6 +490,16 @@ class LogisticDespatch(models.Model):
             _despatch['numero_de_factura_referencia'] = self.l10n_pe_edi_invoice_number
         if self.l10n_pe_edi_purchase_order:
             _despatch['orden_compra_servicio'] = self.l10n_pe_edi_purchase_order
+        if self.l10n_pe_edi_traceid_1:
+            _despatch['numero_de_precinto_1'] = self.l10n_pe_edi_traceid_1
+        if self.l10n_pe_edi_container_1:
+            _despatch['numero_de_contenedor_1'] = self.l10n_pe_edi_container_1
+        if self.l10n_pe_edi_traceid_2:
+            _despatch['numero_de_precinto_2'] = self.l10n_pe_edi_traceid_2
+        if self.l10n_pe_edi_container_2:
+            _despatch['numero_de_contenedor_2'] = self.l10n_pe_edi_container_2
+        if self.l10n_pe_edi_incoterm_id:
+            _despatch['incoterm'] = self.l10n_pe_edi_incoterm_id.code
         if self.note:
             if self.note!='':
                 _despatch['observaciones'] = self.note
@@ -672,6 +682,15 @@ class LogisticDespatchLine(models.Model):
         xxxx(serie)/xxx-xxxx-18-xxxxxx(DS)
         Ejemplo: 0001/123-1234-18-123456
         """)
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if self.product_id:
+            self.name = self.product_id.name
+            self.uom_id = self.product_id.uom_id
+            self.quantity = 1
+            self.weight = self.product_id.weight
+            self.volume = self.product_id.volume
 
 class LogisticDespatchReference(models.Model):
     _name = 'logistic.despatch.reference'

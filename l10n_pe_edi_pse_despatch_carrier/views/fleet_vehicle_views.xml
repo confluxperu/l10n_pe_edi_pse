@@ -1,0 +1,12 @@
+<odoo>
+    <record id="vehicle_form_view" model="ir.ui.view">
+        <field name="name">l10n_pe_edi.vehicle.form.l10n_pe_edi_despatch_carrier</field>
+        <field name="model">l10n_pe_edi.vehicle</field>
+        <field name="inherit_id" ref="l10n_pe_edi_stock.vehicle_form_view" />
+        <field name="arch" type="xml">
+            <field name="operator_id" position="after">
+                <field name="l10n_pe_edi_vehicle_tuc"/>
+            </field>
+        </field>
+    </record>
+</odoo>
