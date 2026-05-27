@@ -60,6 +60,7 @@ class AccountMove(models.Model):
     l10n_pe_edi_payment_fee_ids = fields.One2many('account.move.l10n_pe_payment_fee','move_id', string='Credit Payment Fees')
     l10n_pe_edi_transportref_ids = fields.One2many(
         'account.move.l10n_pe_transportref', 'move_id', string='Attached Despatchs', copy=True)
+    l10n_pe_edi_refund_reason = fields.Selection(selection_add=[('13', 'Ajuste en montos y/o fecha de pago')])
     
     l10n_pe_edi_hash = fields.Char(string='DTE Hash', copy=False)
     l10n_pe_edi_xml_file = fields.Many2one('ir.attachment', string='DTE file', copy=False)
@@ -148,7 +149,8 @@ class AccountMove(models.Model):
         res = super(AccountMove, self)._post(soft=soft)
         pe_edi_format = self.env.ref('l10n_pe_edi_pse_factura.edi_pe_pse')
         for move in self.filtered(lambda m: m.l10n_pe_edi_is_required):
-            move.l10n_pe_edi_compute_fees()
+            if move.move_type=='out_invoice':
+                move.l10n_pe_edi_compute_fees()
             self.env.ref('account_edi.ir_cron_edi_network')._trigger()
         return res
     
