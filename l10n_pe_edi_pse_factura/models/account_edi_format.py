@@ -422,6 +422,8 @@ class AccountEdiFormat(models.Model):
             conflux_dte['fecha_de_vencimiento'] = record.invoice_date_due.strftime('%Y-%m-%d')
 
         payment_fee_id = 0
+        if record.l10n_pe_edi_payment_fee_ids:
+            conflux_dte['forma_de_pago_credito'] = True
         for payment_fee in record.l10n_pe_edi_payment_fee_ids:
             payment_fee_id+=1
             conflux_dte['credito_cuotas'].append({
