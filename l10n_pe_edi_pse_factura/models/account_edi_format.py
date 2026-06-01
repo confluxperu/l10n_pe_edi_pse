@@ -321,6 +321,9 @@ class AccountEdiFormat(models.Model):
         if record.l10n_latam_document_type_id.code=='01' and record.invoice_date_due:
             conflux_dte['fecha_de_vencimiento'] = record.invoice_date_due.strftime('%Y-%m-%d')
 
+        if record.l10n_pe_edi_payment_fee_ids:
+            conflux_dte['forma_de_pago_credito'] = True
+
         payment_fee_id = 0
         for payment_fee in record.l10n_pe_edi_payment_fee_ids:
             payment_fee_id+=1

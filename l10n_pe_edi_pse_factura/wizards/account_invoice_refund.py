@@ -5,6 +5,8 @@ from odoo import api, fields, models
 class AccountMoveReversal(models.TransientModel):
     _inherit = 'account.move.reversal'
 
+    l10n_pe_edi_refund_reason = fields.Selection(selection_add=[('13', 'Ajuste en montos y/o fecha de pago')])
+
     def _prepare_default_reversal(self, move):
         values = super()._prepare_default_reversal(move)
         if move.company_id.country_id.code == "PE" and move.journal_id.l10n_latam_use_documents:

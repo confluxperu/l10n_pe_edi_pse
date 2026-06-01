@@ -27,6 +27,7 @@ class AccountMove(models.Model):
             """)
         return res
 
+    l10n_pe_edi_refund_reason = fields.Selection(selection_add=[('13', 'Ajuste en montos y/o fecha de pago')])
     l10n_pe_edi_pse_uid = fields.Char(string='PSE Unique identifier', copy=False)
     l10n_pe_edi_pse_cancel_uid = fields.Char(string='PSE Identifier for Cancellation', copy=False)
     l10n_pe_edi_pse_attachment_ids = fields.Many2many('ir.attachment', string='EDI Attachments')
@@ -104,7 +105,7 @@ class AccountMove(models.Model):
         res = super(AccountMove, self)._post(soft=soft)
         pe_edi_format = self.env.ref('l10n_pe_edi_pse_factura.edi_pe_pse')
         for move in self.filtered(lambda m: m.l10n_pe_edi_is_required):
-            if move.type=='out_invoice':
+            if move.move_type=='out_invoice':
                 move.l10n_pe_edi_compute_fees()
             self.env.ref('account_edi.ir_cron_edi_network')._trigger()
         return res
