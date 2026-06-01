@@ -104,7 +104,8 @@ class AccountMove(models.Model):
         res = super(AccountMove, self)._post(soft=soft)
         pe_edi_format = self.env.ref('l10n_pe_edi_pse_factura.edi_pe_pse')
         for move in self.filtered(lambda m: m.l10n_pe_edi_is_required):
-            move.l10n_pe_edi_compute_fees()
+            if move.type=='out_invoice':
+                move.l10n_pe_edi_compute_fees()
             self.env.ref('account_edi.ir_cron_edi_network')._trigger()
         return res
     
