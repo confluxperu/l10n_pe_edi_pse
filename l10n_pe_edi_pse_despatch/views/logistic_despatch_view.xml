@@ -22,6 +22,7 @@
                 <field name="l10n_pe_edi_transport_mode" readonly="state != 'draft'"/>
             </field>
             <field name="sequence_id" position="after">
+                <field name="l10n_pe_edi_occurrence_date" readonly="state != 'draft'"/>
                 <field name="l10n_pe_edi_invoice_number" readonly="state != 'draft'"/>
                 <field name="l10n_pe_edi_purchase_order" readonly="state != 'draft'"/>
             </field>
@@ -98,6 +99,11 @@
                         <field name="l10n_pe_edi_is_transport_total_dam_ds" readonly="state != 'draft'"/>
                         <field name="l10n_pe_edi_is_carrier_vehicle_and_driver" readonly="state != 'draft'"/>
                         <field name="l10n_pe_edi_shipment_description" readonly="state != 'draft'"/>
+                        <field name="l10n_pe_edi_traceid_1" readonly="state != 'draft'"/>
+                        <field name="l10n_pe_edi_container_1" readonly="state != 'draft'"/>
+                        <field name="l10n_pe_edi_traceid_2" readonly="state != 'draft'"/>
+                        <field name="l10n_pe_edi_container_2" readonly="state != 'draft'"/>
+                        <field name="l10n_pe_edi_incoterm_id" readonly="state != 'draft'"/>
                     </group>
                 </page>
                 <page string="Electronic Despatch" name="pe_electronic_invoice" invisible="l10n_pe_edi_status == False">

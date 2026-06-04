@@ -110,6 +110,12 @@ class LogisticDespatch(models.Model):
     l10n_pe_edi_is_carrier_vehicle_and_driver = fields.Boolean(string='Indicador de registro de vehículos y conductores del transportista')
     l10n_pe_edi_transport_event_type = fields.Boolean(string='Tipo de evento')
     l10n_pe_edi_shipment_description = fields.Char(string='Motivo de envio')
+    l10n_pe_edi_traceid_1 = fields.Char(string='Nro. Precinto 1')
+    l10n_pe_edi_container_1 = fields.Char(string='Nro. Contenedor 1')
+    l10n_pe_edi_traceid_2 = fields.Char(string='Nro. Precinto 2')
+    l10n_pe_edi_container_2 = fields.Char(string='Nro. Contenedor 1')
+    l10n_pe_edi_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm')
+    l10n_pe_edi_occurrence_date = fields.Date(string='Fecha de entrega a transportista', help='')
 
     l10n_pe_edi_invoice_number = fields.Char(string='Numero de Factura')
     l10n_pe_edi_purchase_order = fields.Char(string='Orden de Compra')
@@ -119,8 +125,6 @@ class LogisticDespatch(models.Model):
     def _onchange_origin_address_id(self):
         if self.origin_address_id and self.l10n_pe_edi_shipment_reason=='04':
             self.l10n_pe_edi_origin_branch_code = self.origin_address_id.l10n_pe_edi_address_type_code
-        else:
-            self.l10n_pe_edi_origin_branch_code = ''
 
     @api.onchange('delivery_address_id')
     def _onchange_delivery_address_id(self):
@@ -268,7 +272,7 @@ class LogisticDespatch(models.Model):
                                 xml_attach = ir_attach.create({
                                     "name":"R-%s-%s.zip" % (move.company_id.vat, move.id),
                                     'res_model': self._name,
-                                    'res_id': self.id,
+                                    'res_id': move.id,
                                     "type":'url',
                                     "company_id": move.company_id.id,
                                     "url":response[1].get("enlace_del_cdr")
@@ -369,6 +373,16 @@ class LogisticDespatch(models.Model):
             _despatch['numero_de_factura_referencia'] = self.l10n_pe_edi_invoice_number
         if self.l10n_pe_edi_purchase_order:
             _despatch['orden_compra_servicio'] = self.l10n_pe_edi_purchase_order
+        if self.l10n_pe_edi_traceid_1:
+            _despatch['numero_de_precinto_1'] = self.l10n_pe_edi_traceid_1
+        if self.l10n_pe_edi_container_1:
+            _despatch['numero_de_contenedor_1'] = self.l10n_pe_edi_container_1
+        if self.l10n_pe_edi_traceid_2:
+            _despatch['numero_de_precinto_2'] = self.l10n_pe_edi_traceid_2
+        if self.l10n_pe_edi_container_2:
+            _despatch['numero_de_contenedor_2'] = self.l10n_pe_edi_container_2
+        if self.l10n_pe_edi_incoterm_id:
+            _despatch['incoterm'] = self.l10n_pe_edi_incoterm_id.code
         if self.note:
             if self.note!='':
                 _despatch['observaciones'] = self.note
@@ -408,6 +422,12 @@ class LogisticDespatch(models.Model):
                     _reference['proveedor_documento_tipo'] = ref.partner_id.l10n_latam_identification_type_id.l10n_pe_vat_code
                     _reference['proveedor_documento_numero'] = ref.partner_id.vat
                 _despatch['documentos_de_referencia'].append(_reference)
+
+        if self.l10n_pe_edi_transport_mode=='01':
+            if self.l10n_pe_edi_occurrence_date:
+                _despatch['fecha_de_entrega_al_transportista'] = self.l10n_pe_edi_occurrence_date.strftime("%Y-%m-%d")
+            else:
+                raise ValidationError('La fecha de entrega al transportista es requerida para el modo de transporte "01 - Entrega al transportista".')
 
         if self.line_ids:
             for line in self.line_ids:
