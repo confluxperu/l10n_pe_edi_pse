@@ -58,6 +58,7 @@
                             <group>
                                 <field name="issue_date" readonly="state != 'draft'" />
                                 <field name="start_date" readonly="state != 'draft'"/>
+                                <field name="l10n_pe_edi_occurrence_date" readonly="state != 'draft'"/>
                                 <field name="domain_sequence_id" invisible="1"/>
                                 <field name="sequence_id" domain="[('id','in', domain_sequence_id)]" options="{'no_open': True,'no_create': 1, 'no_create_edit': 1}" readonly="state != 'draft'"/>
                                 <field name="l10n_pe_edi_invoice_number" readonly="state != 'draft'"/>

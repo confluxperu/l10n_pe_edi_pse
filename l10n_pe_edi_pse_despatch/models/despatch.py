@@ -154,6 +154,7 @@ class LogisticDespatch(models.Model):
     l10n_pe_edi_traceid_2 = fields.Char(string='Nro. Precinto 2')
     l10n_pe_edi_container_2 = fields.Char(string='Nro. Contenedor 1')
     l10n_pe_edi_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm')
+    l10n_pe_edi_occurrence_date = fields.Date(string='Fecha de entrega a transportista', help='')
 
     l10n_pe_edi_invoice_number = fields.Char(string='Numero de Factura')
     l10n_pe_edi_purchase_order = fields.Char(string='Orden de Compra')
@@ -539,6 +540,12 @@ class LogisticDespatch(models.Model):
                     _reference['proveedor_documento_tipo'] = ref.partner_id.l10n_latam_identification_type_id.l10n_pe_vat_code
                     _reference['proveedor_documento_numero'] = ref.partner_id.vat
                 _despatch['documentos_de_referencia'].append(_reference)
+
+        if self.l10n_pe_edi_transport_mode=='01':
+            if self.l10n_pe_edi_occurrence_date:
+                _despatch['fecha_de_entrega_al_transportista'] = self.l10n_pe_edi_occurrence_date.strftime("%Y-%m-%d")
+            else:
+                raise ValidationError('La fecha de entrega al transportista es requerida para el modo de transporte "01 - Entrega al transportista".')
 
         if self.line_ids:
             for line in self.line_ids:
