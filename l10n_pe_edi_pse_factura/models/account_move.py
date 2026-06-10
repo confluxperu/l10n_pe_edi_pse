@@ -203,6 +203,7 @@ class AccountMove(models.Model):
     
     def l10n_pe_edi_compute_fees(self):
         invoice = self
+        invoice.l10n_pe_edi_payment_fee_ids.unlink()
         spot = invoice._l10n_pe_edi_get_spot()
         if spot:
             spot_amount = spot['amount'] if invoice.currency_id == invoice.company_id.currency_id else spot['spot_amount']

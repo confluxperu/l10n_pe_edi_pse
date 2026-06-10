@@ -434,8 +434,14 @@ class LogisticDespatch(models.Model):
             'receptor_denominacion': self.partner_id.name,
             'receptor_tipo_de_documento': self.partner_id.l10n_latam_identification_type_id.l10n_pe_vat_code,
             'receptor_numero_de_documento': self.partner_id.vat,
-            'receptor_direccion': self.partner_id.street,
-
+            'receptor_direccion': (self.partner_id.street_name or '') \
+                                + (self.partner_id.street_number and (' ' + self.partner_id.street_number) or '') \
+                                + (self.partner_id.street_number2 and (' ' + self.partner_id.street_number2) or '') \
+                                + (self.partner_id.street2 and (' ' + self.partner_id.street2) or '') \
+                                + (self.partner_id.l10n_pe_district and ', ' + self.partner_id.l10n_pe_district.name or '') \
+                                + (self.partner_id.city_id and ', ' + self.partner_id.city_id.name or '') \
+                                + (self.partner_id.state_id and ', ' + self.partner_id.state_id.name or '') \
+                                + (self.partner_id.country_id and ', ' + self.partner_id.country_id.name or ''),
             'fecha_de_emision': self.issue_date.strftime("%Y-%m-%d"),
             'fecha_de_inicio': self.start_date.strftime("%Y-%m-%d"),
 
