@@ -59,6 +59,7 @@ class AccountMove(models.Model):
     l10n_pe_edi_payment_fee_ids = fields.One2many('account.move.l10n_pe_payment_fee','move_id', string='Credit Payment Fees')
     l10n_pe_edi_transportref_ids = fields.One2many(
         'account.move.l10n_pe_transportref', 'move_id', string='Attached Despatchs', copy=True)
+    l10n_pe_edi_refund_reason = fields.Selection(selection_add=[('13', 'Ajuste en montos y/o fecha de pago')])
     
     l10n_pe_edi_hash = fields.Char(string='DTE Hash', copy=False)
     l10n_pe_edi_xml_file = fields.Many2one('ir.attachment', string='DTE file', copy=False)
