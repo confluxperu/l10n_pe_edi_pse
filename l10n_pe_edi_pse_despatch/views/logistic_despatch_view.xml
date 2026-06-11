@@ -23,7 +23,7 @@
                     <field name="l10n_pe_edi_pdf_file" invisible="1"/>
                     <field name="l10n_pe_edi_cdr_file" invisible="1"/>
                     <field name="l10n_pe_edi_status" invisible="1"/>
-                    <div class="alert alert-success" role="alert" invisible="l10n_pe_edi_status != 'accepted'">
+                    <div class="alert alert-success" role="alert" invisible="l10n_pe_edi_status not in ('accepted','objected')">
                         <strong class="alert-title">Registration in SUNAT</strong>
                         <div class="o_row"><field name="l10n_pe_edi_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_action_open_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_action_open_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="l10n_pe_edi_action_open_cdr_file" type="object" string="Open CDR File" icon="fa-file-code-o" class="btn-link p-1"/> </div>
                     </div>
