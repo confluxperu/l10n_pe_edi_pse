@@ -19,8 +19,9 @@ import logging
 log = logging.getLogger(__name__)
 
 DEFAULT_CONFLUX_FACTURA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/'
-DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'http://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
-DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/void/'
+DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
+DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/anular/'
+DEFAULT_CONFLUX_VOID_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/einvoice_void/void_ra/%s/'
 
 def request_json(token="", method="post", url=None, data_dict=None):
     s = requests.Session()
@@ -170,7 +171,8 @@ class AccountEdiFormat(models.Model):
 
         descuento_importe_02 = 0
         descuento_importe_03 = 0
-        descuento_base = 0
+        descuento_base_02 = 0
+        descuento_base_03 = 0
 
         if base_dte['vals'].get('line_vals'):
             for invoice_line in base_dte['vals'].get('line_vals', []):
@@ -211,10 +213,16 @@ class AccountEdiFormat(models.Model):
                     descuento_importe_03+=abs(line.price_subtotal)
                     continue
                 if not line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
-                    descuento_importe_02+=abs(line.price_subtotal)
+                    if line.l10n_pe_edi_affectation_reason=='10':
+                        descuento_importe_02+=abs(line.price_subtotal)
+                    else:
+                        descuento_importe_03+=abs(line.price_subtotal)
                     continue
                 else:
-                    descuento_base+=abs(line.price_subtotal)
+                    if line.l10n_pe_edi_affectation_reason=='10':
+                        descuento_base_02+=abs(line.price_subtotal)
+                    else:
+                        descuento_base_03+=abs(line.price_subtotal)
                     default_uom = 'NIU'
                     if line.product_id.type=='service':
                         default_uom = 'ZZ'
@@ -288,15 +296,14 @@ class AccountEdiFormat(models.Model):
 
         if descuento_importe_02>0:
             conflux_dte["descuento_tipo"]="02"
-            conflux_dte["descuento_base"]=descuento_base
+            conflux_dte["descuento_base"]=descuento_base_02
             conflux_dte["descuento_importe"]=descuento_importe_02
-            conflux_dte["descuento_factor"]=descuento_importe_02/descuento_base
         
         if descuento_importe_03>0:
-            conflux_dte["descuento_tipo"]="03"
-            conflux_dte["descuento_base"]=descuento_base
-            conflux_dte["descuento_importe"]=descuento_importe_03
-            conflux_dte["descuento_factor"]=descuento_importe_03/descuento_base
+            conflux_dte["descuento_base_no_afecta_bi"]=descuento_base_03
+            conflux_dte["descuento_importe_no_afecta_bi"]=descuento_importe_03
+            conflux_dte['total']-= descuento_importe_03
+
 
         if record.l10n_latam_document_type_id.code=='07':
             conflux_dte['tipo_de_nota_de_credito'] = record.l10n_pe_edi_refund_reason
@@ -436,6 +443,7 @@ class AccountEdiFormat(models.Model):
         success = False
         extra_msg = ''
         edi_status = 'ask_for_status'
+        pse_status_response = ''
         if result.get('emision_aceptada', False):
             edi_status = 'accepted'
             success = True
@@ -445,6 +453,10 @@ class AccountEdiFormat(models.Model):
             extra_msg = '%s - %s' % (result.get('sunat_description', ''), result.get('sunat_note', '')), 
             edi_status = 'rejected'
             success = True
+
+        pse_status_response = result.get('sunat_description', '')
+        if result.get('sunat_note', False):
+            pse_status_response += ' - %s' % result.get('sunat_note', '')
             
         return {
             'success':success,
@@ -452,7 +464,8 @@ class AccountEdiFormat(models.Model):
             'pdf_url':pdf_url,
             'cdr_url':cdr_url,
             'pse_status': edi_status,
-            'extra_msg': extra_msg
+            'extra_msg': extra_msg,
+            'pse_status_response': pse_status_response
         }
 
     def _l10n_pe_edi_sign_invoice_pse(self, invoice):
@@ -470,6 +483,7 @@ class AccountEdiFormat(models.Model):
         if not latam_invoice_type:
             return {invoice: {'error': _("Missing LATAM document code.")}}
 
+        log.info("ENVIO DE COMPROBANTE %s DE EMPRESA: %s" % (invoice.id, invoice.company_id.name))
         res = self._l10n_pe_edi_post_invoice_web_service_pse(invoice, edi_filename, edi_str)
 
         return {invoice: res}
@@ -513,13 +527,14 @@ class AccountEdiFormat(models.Model):
             if result['message'] == 'no-credit':
                 error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
             else:
-                error_message = '%s - [LOG: %s]' % (result['message'], json.dumps(result))
+                error_message = result['message']
             return {'error': error_message, 'blocking_level': 'error'}
 
         xml_url = None
         cdr_url = None
         pdf_url = None
         success = False
+        pse_status_response = ''
         if result.get('status')=='success':
             edi_status = 'ask_for_status'
             success = True
@@ -536,7 +551,10 @@ class AccountEdiFormat(models.Model):
                 log.info(data_dict)
                 edi_status = 'rejected'
                 success = True
-                error_message = result['success']['data']['sunat_description']
+
+            pse_status_response = result['success']['data'].get('sunat_description', '')
+            if result['success']['data'].get('sunat_note', False):
+                pse_status_response += ' - %s' % result['success']['data'].get('sunat_note', '')
                 
             return {
                 'success':success,
@@ -545,15 +563,15 @@ class AccountEdiFormat(models.Model):
                 'pdf_url':pdf_url,
                 'cdr_url':cdr_url,
                 'pse_status': edi_status,
-                'extra_msg': error_message if edi_status == 'rejected' else ''
+                'pse_status_response': pse_status_response
             }
-        extra_msg = error_message
+        extra_msg = result.get('message','')
         return {'xml_url': xml_url, 'cdr_url': cdr_url, 'extra_msg': extra_msg}
     
     def _l10n_pe_edi_pse_cancel_invoices_step_1_conflux(self, company, invoice):
         self.ensure_one()
         try:
-            result = request_json(url=DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT, method='post', token=company.l10n_pe_edi_pse_secret_key, data_dict={'id':invoice.l10n_pe_edi_pse_uid})
+            result = request_json(url=DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='post', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
         except AccessError:
             return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
         except KeyError:
@@ -563,56 +581,113 @@ class AccountEdiFormat(models.Model):
             error_message = result['message']
             return {'error': error_message, 'blocking_level': 'error'}
 
-        void_uid = 'VOID-%s' % invoice.l10n_pe_edi_pse_uid
+        void_uid = 'NO_VOID_UID'
+        if result.get('status')=='success' and result['data'].get('comunicacion_de_baja', False):
+            void_uid = result['data']['comunicacion_de_baja']
 
         edi_void_status = 'ask_for_status'
 
         return {'void_uid': void_uid, 'pse_void_status':edi_void_status}
 
     def _l10n_pe_edi_pse_cancel_invoices_step_2_conflux(self, company, invoice):
-        try:
-            result = request_json(url=DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
-        except KeyError:
-            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
-        except AccessError:
-            return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
+        if invoice.l10n_pe_edi_pse_cancel_uid and invoice.l10n_pe_edi_pse_cancel_uid!='NO_VOID_UID':
+            try:
+                result = request_json(url=DEFAULT_CONFLUX_VOID_ENDPOINT % invoice.l10n_pe_edi_pse_cancel_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+            except KeyError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
+            except AccessError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
 
-        if result.get('message') and result.get('status')=='error':
-            if result['message'] == 'no-credit':
-                error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
-            else:
-                error_message = result['message']
-            return {'error': error_message, 'blocking_level': 'error'}
+            if result.get('message') and result.get('status')=='error':
+                if result['message'] == 'no-credit':
+                    error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
+                else:
+                    error_message = result['message']
+                return {'error': error_message, 'blocking_level': 'error'}
 
-        extra_msg = ''
-        edi_void_status = 'ask_for_status'
-        if result.get('baja_aceptada', False):
-            edi_void_status = 'accepted'
-        if result.get('baja_rechazada', False):
-            extra_msg = _('The EDI document failed to be cancelled')
-            edi_void_status = 'rejected'
+            extra_msg = ''
+            xml_url = None
+            cdr_url = None
+            pdf_url = None
+            edi_void_status = 'ask_for_status'
+            pse_void_status_response = ''
+            if result.get('emision_aceptada', False):
+                edi_void_status = 'accepted'
+            if result.get('emision_rechazada', False):
+                extra_msg = result.get('sunat_description', '')
+                if result.get('sunat_note', False):
+                    extra_msg += ' - %s' % result.get('sunat_note', '')
+                edi_void_status = 'rejected'
 
-        return {'success': True, 'cdr': 'CDR-NO-DISPONIBLE','pse_void_status':edi_void_status,'extra_msg': extra_msg}
+            pse_void_status_response = result.get('sunat_description', '')
+            if result.get('sunat_note', False):
+                pse_void_status_response += ' - %s' % result.get('sunat_note', '')
+
+            if result.get('enlace_del_xml', False):
+                xml_url = result['enlace_del_xml']
+            if result.get('enlace_del_pdf', False):
+                pdf_url = result['enlace_del_pdf']
+            if result.get('enlace_del_cdr', False):
+                cdr_url = result['enlace_del_cdr']
+
+            return {
+                'success': True, 
+                'cdr': 'CDR-NO-DISPONIBLE',
+                'pse_void_status':edi_void_status,
+                'pse_void_status_response': pse_void_status_response,
+                'extra_msg': extra_msg,
+                'xml_url': xml_url,
+                'pdf_url': pdf_url,
+                'cdr_url': cdr_url
+            }
+        else:
+            try:
+                result = request_json(url=DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT % invoice.l10n_pe_edi_pse_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+            except KeyError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
+            except AccessError:
+                return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE17'], 'blocking_level': 'warning'}
+
+            if result.get('message') and result.get('status')=='error':
+                if result['message'] == 'no-credit':
+                    error_message = self._l10n_pe_edi_get_iap_buy_credits_message(company)
+                else:
+                    error_message = result['message']
+                return {'error': error_message, 'blocking_level': 'error'}
+
+            extra_msg = ''
+            xml_url = None
+            cdr_url = None
+            pdf_url = None
+            edi_void_status = 'ask_for_status'
+            pse_void_status_response = ''
+            if result.get('baja_aceptada', False):
+                edi_void_status = 'accepted'
+                pse_void_status_response = _('Void accepted by SUNAT - Files cannot be provided')
+            if result.get('baja_rechazada', False):
+                edi_void_status = 'rejected'
+                pse_void_status_response = _('Void rejected by SUNAT - Files cannot be provided')
+
+            return {
+                'success': True, 
+                'cdr': 'CDR-NO-DISPONIBLE',
+                'pse_void_status':edi_void_status,
+                'pse_void_status_response': pse_void_status_response,
+                'extra_msg': extra_msg,
+                'xml_url': xml_url,
+                'pdf_url': pdf_url,
+                'cdr_url': cdr_url
+            }
 
     def _l10n_pe_edi_pse_cancel_invoice_edi_step_1(self, invoice):
         self.ensure_one()
         company = invoice[0].company_id # documents are always batched by company in account_edi.
         provider = company.l10n_pe_edi_provider
 
-        void_filename = '%s-%s-%s' % (
-            invoice.company_id.vat,
-            invoice.l10n_latam_document_type_id.code,
-            invoice.name.replace(' ', ''),
-        )
-
         res = getattr(self, '_l10n_pe_edi_pse_cancel_invoices_step_1_%s' % provider)(company, invoice)
 
         if res.get('error'):
             return {invoice: res}
-
-        if not res.get('void_uid'):
-            error = _("The EDI document failed to be cancelled because the cancellation Void identifier is missing.")
-            return {invoice: {'error': error}}
 
         # Chatter.
         message = _("Cancellation is in progress in the government side (Void identifier: %s).", html_escape(res['void_uid']))
@@ -628,7 +703,10 @@ class AccountEdiFormat(models.Model):
                 #attachment_ids=void_attachment.ids,
             )
 
-        invoice.write({'l10n_pe_edi_pse_cancel_uid': res['void_uid'], 'l10n_pe_edi_pse_void_status':res['pse_void_status']})
+        invoice.write({
+            'l10n_pe_edi_pse_cancel_uid': res['void_uid'], 
+            'l10n_pe_edi_pse_void_status':res['pse_void_status'],
+        })
         #return {invoice: {'error': message, 'blocking_level': 'info'}}
         return {invoice: {'success': True}}
 
@@ -647,6 +725,25 @@ class AccountEdiFormat(models.Model):
 
         # Chatter.
         message = _("The EDI document was successfully cancelled by the government (Void identifier: %s).", html_escape(invoice.l10n_pe_edi_pse_cancel_uid))
+        invoice_update = {
+            'l10n_pe_edi_pse_void_status':res['pse_void_status'],
+            'l10n_pe_edi_pse_void_status_response':res['pse_void_status_response'],
+            'l10n_pe_edi_void_xml_file':res['xml_url'],
+            'l10n_pe_edi_void_pdf_file':res['pdf_url'],
+            'l10n_pe_edi_void_cdr_file':res['cdr_url']
+        }
+
+        if res.get('xml_url') and not invoice.l10n_pe_edi_void_xml_file:
+            attachment_xml_id = self._l10n_pe_edi_pse_create_attachment([('%s.xml' % invoice.l10n_pe_edi_pse_cancel_uid, res['xml_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_xml_file'] = attachment_xml_id[0]
+        if res.get('pdf_url') and not invoice.l10n_pe_edi_void_pdf_file:
+            attachment_pdf_id = self._l10n_pe_edi_pse_create_attachment([('%s.pdf' % invoice.l10n_pe_edi_pse_cancel_uid, res['pdf_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_pdf_file'] = attachment_pdf_id[0]
+        if res.get('cdr_url') and not invoice.l10n_pe_edi_void_cdr_file:
+            attachment_cdr_id = self._l10n_pe_edi_pse_create_attachment([('CDR-%s.xml' % invoice.l10n_pe_edi_pse_cancel_uid, res['cdr_url'], invoice.company_id)])
+            invoice_update['l10n_pe_edi_void_cdr_file'] = attachment_cdr_id[0]
+
+        invoice.write(invoice_update)
         invoice.with_context(no_new_invoice=True).message_post(
             body=message,
         )

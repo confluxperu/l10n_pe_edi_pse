@@ -46,6 +46,24 @@
                         </div>
                     </button>
                 </div>
+                <xpath expr="//div[@role='alert']" position="after">
+                    <field name="l10n_pe_edi_pse_void_status" invisible="1"/>
+                    <field name="l10n_pe_edi_void_xml_file" invisible="1"/>
+                    <field name="l10n_pe_edi_void_pdf_file" invisible="1"/>
+                    <field name="l10n_pe_edi_void_cdr_file" invisible="1"/>
+                    <div class="alert alert-success" role="alert" invisible="l10n_pe_edi_pse_void_status != 'accepted'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_void_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="l10n_pe_edi_pse_action_open_void_cdr_file" type="object" string="Open CDR File" icon="fa-file-code-o" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="l10n_pe_edi_pse_void_status != 'rejected'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row"><field name="l10n_pe_edi_pse_void_status_response" readonly="1" class="w-auto"/> <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1"/> <button name="action_l10n_pe_edi_pse_void_status" type="object" string="Get Status" icon="fa-refresh" class="btn-link p-1"/> </div>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="l10n_pe_edi_pse_void_status != 'ask_for_status'">
+                        <strong class="alert-title">Cancellation in SUNAT</strong>
+                        <div class="o_row">Cancellation is being processed by SUNAT <button name="l10n_pe_edi_pse_action_open_void_xml_file" type="object" string="Open XML File" icon="fa-file-code-o" class="btn-link p-1" invisible="not l10n_pe_edi_void_xml_file"/>  <button name="l10n_pe_edi_pse_action_open_void_pdf_file" type="object" string="Open PDF File" icon="fa-file-pdf-o" class="btn-link p-1" invisible="not l10n_pe_edi_void_pdf_file"/> <button name="action_l10n_pe_edi_pse_void_status" type="object" string="Get Status" icon="fa-refresh" class="btn-link p-1"/></div>
+                    </div>
+                </xpath>
                 <xpath expr="//button[@name='button_cancel_posted_moves']" position="attributes">
                     <attribute name="invisible">not l10n_pe_edi_show_cancel_button</attribute>
                 </xpath>
