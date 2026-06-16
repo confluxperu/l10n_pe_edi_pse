@@ -295,7 +295,7 @@ class AccountMove(models.Model):
     def action_l10n_pe_edi_pse_void_status(self):
         for rec in self:
             if rec.l10n_pe_edi_pse_void_status=='ask_for_status':
-                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('cancelled',))
+                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('cancelled','to_cancel'))
                 docs.edi_format_id._l10n_pe_edi_pse_cancel_invoice_edi_step_2(rec)
 
 class AccountMoveLine(models.Model):
