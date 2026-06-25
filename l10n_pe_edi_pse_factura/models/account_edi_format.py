@@ -152,6 +152,13 @@ class AccountEdiFormat(models.Model):
             conflux_line['descuento_base']=line.price_subtotal/(1.0 - conflux_line['descuento_factor'])
             conflux_line['descuento_importe']=conflux_line['descuento_base'] * conflux_line['descuento_factor']
 
+        if line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
+            conflux_line['anticipo_regularizacion'] = line.l10n_pe_edi_downpayment_line
+            conflux_line['anticipo_numero_de_documento'] = line.l10n_pe_edi_downpayment_ref_number
+            conflux_line['anticipo_tipo_de_documento'] = line.l10n_pe_edi_downpayment_ref_type
+            if line.l10n_pe_edi_downpayment_date:
+                conflux_line['anticipo_fecha'] = line.l10n_pe_edi_downpayment_date.strftime('%Y-%m-%d')
+
         if isc_amount>0:
             conflux_line['tipo_de_calculo_isc'] = isc_type
         return conflux_line
