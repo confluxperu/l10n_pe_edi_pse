@@ -187,12 +187,15 @@ class AccountMove(models.Model):
         if self.amount_total_signed<700:
             return {}
 
+        amount_total = self.amount_total - self._l10n_pe_edi_get_free_amount()
+        amount_total_signed = self.amount_total_signed - self._l10n_pe_edi_get_free_amount()
+
         return {
             'retention_type': self.partner_id.l10n_pe_edi_retention_type,
-            'retention_base': self.amount_total,
-            'base_amount': self.amount_total_signed,
-            'retention_amount': float_round(self.amount_total * (percent / 100.0), precision_rounding=0.01),
-            'amount': float_round(self.amount_total_signed * (percent / 100.0), precision_rounding=1),
+            'retention_base': amount_total,
+            'base_amount': amount_total_signed,
+            'retention_amount': float_round(amount_total * (percent / 100.0), precision_rounding=0.01),
+            'amount': float_round(amount_total_signed * (percent / 100.0), precision_rounding=1),
         }
     
     def _l10n_pe_edi_get_spot(self):
@@ -209,7 +212,7 @@ class AccountMove(models.Model):
                 if any(
                     tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
                 ):
-                    amount_free += line.price_subtotal
+                    amount_free += line.price_total
         return amount_free
     
     def l10n_pe_edi_compute_fees(self):
