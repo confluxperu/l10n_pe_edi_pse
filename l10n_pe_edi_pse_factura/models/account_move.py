@@ -227,7 +227,7 @@ class AccountMove(models.Model):
         first_time = True
         amount_pending = invoice.amount_total - free_amount
         for rec_line in invoice.line_ids.filtered(lambda l: l.account_type == 'asset_receivable'):
-            factor = amount_pending / invoice.amount_total if rec_line.amount_currency else 0.0
+            factor = amount_pending / invoice.amount_total if invoice.amount_total else 0.0
             amount = rec_line.amount_currency - round(free_amount*factor, 2)
             
             if spot and first_time:
