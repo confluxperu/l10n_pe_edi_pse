@@ -200,6 +200,17 @@ class AccountMove(models.Model):
         if self.amount_total_signed<700:
             return {}
         return res
+
+    def _l10n_pe_edi_get_free_amount(self):
+        self.ensure_one()
+        amount_free = 0.0
+        for line in self.line_ids.filtered(lambda x: x.display_type == "product"):
+            if self.is_invoice(True):
+                if any(
+                    tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
+                ):
+                    amount_free += line.price_subtotal
+        return amount_free
     
     def l10n_pe_edi_compute_fees(self):
         invoice = self
@@ -210,10 +221,15 @@ class AccountMove(models.Model):
         retention = invoice._l10n_pe_edi_get_retention()
         if retention:
             retention_amount = retention['amount'] if invoice.currency_id == invoice.company_id.currency_id else retention['retention_amount']
+
+        free_amount = invoice._l10n_pe_edi_get_free_amount()
         invoice_date_due_vals_list = []
         first_time = True
+        amount_pending = invoice.amount_total - free_amount
         for rec_line in invoice.line_ids.filtered(lambda l: l.account_type == 'asset_receivable'):
-            amount = rec_line.amount_currency
+            factor = amount / invoice.amount_total if rec_line.amount_currency else 0.0
+            amount = rec_line.amount_currency - round(free_amount*factor, 2)
+            
             if spot and first_time:
                 amount -= spot_amount
             if retention and first_time:
