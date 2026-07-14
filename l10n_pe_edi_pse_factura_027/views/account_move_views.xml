@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
-                    <page string="Detracción de transporte 027" name="l10n_pe_edi_detraccion" attrs="{'invisible': [('move_type', 'not in', ('out_invoice','out_receipt'))]}">
+                    <page string="Detracción de transporte 027" name="l10n_pe_edi_detraccion" invisible="move_type not in ['out_invoice','out_receipt']">
                         <group>
                             <field name="l10n_pe_dte_dettran_origin_address_id"/>
                             <field name="l10n_pe_dte_dettran_delivery_address_id"/>
