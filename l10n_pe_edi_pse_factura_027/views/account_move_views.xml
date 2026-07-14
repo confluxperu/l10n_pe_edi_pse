@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_move_form" model="ir.ui.view">
+            <field name="name">account.move.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                    <page string="Detracción de transporte 027" name="l10n_pe_edi_detraccion" attrs="{'invisible': [('move_type', 'not in', ('out_invoice','out_receipt'))]}">
+                        <group>
+                            <field name="l10n_pe_dte_dettran_origin_address_id"/>
+                            <field name="l10n_pe_dte_dettran_delivery_address_id"/>
+                            <field name="l10n_pe_dte_dettran_val_ref_serv_trans"/>
+                            <field name="l10n_pe_dte_dettran_val_ref_carga_efec"/>
+                            <field name="l10n_pe_dte_dettran_val_ref_carga_util"/>
+                            <field name="l10n_pe_dte_dettran_detalle_viaje"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
