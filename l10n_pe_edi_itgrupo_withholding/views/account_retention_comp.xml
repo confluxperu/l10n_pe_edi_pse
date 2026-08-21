@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="account_retention_comp_form_view" model="ir.ui.view">
+            <field name="model">account.retention.comp</field>
+            <field name="name">account.retention.comp.form.l10n_pe_edi</field>
+            <field name="inherit_id" ref="account_multipayment_supplier_retentions.account_retention_comp_form_view" />
+            <field name="arch" type="xml">
+                <button name="action_draft" position="after">
+                    <button name="l10n_pe_dte_action_cancel" string="Cancel in SUNAT" type="object" class="btn btn-danger" invisible="state != 'done'"/>
+                </button>
+                <group name="main" position="before">
+                    <div name="button_box" class="oe_button_box">
+                        <button type="object" class="oe_stat_button" name="l10n_pe_dte_action_send" icon="fa-cloud-upload" invisible="l10n_pe_dte_status != 'not_sent' or state not in ['done']">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Send to</span>
+                                <span class="o_stat_text">SUNAT</span>
+                            </div>
+                        </button>
+                        <button type="object" class="text-danger" name="l10n_pe_dte_action_check" icon="fa-refresh" invisible="l10n_pe_dte_status != 'ask_for_status'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Check</span>
+                                <span class="o_stat_text">Status</span>
+                            </div>
+                        </button>
+                        <button type="object" class="text-danger" name="l10n_pe_dte_action_check" icon="fa-refresh" invisible="l10n_pe_dte_void_status != 'ask_for_status'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Consultar</span>
+                                <span class="o_stat_text">Estado Baja</span>
+                            </div>
+                        </button>
+                        <button class="text-success" icon="fa-check" invisible="l10n_pe_dte_status != 'accepted'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Accepted by</span>
+                                <span class="o_stat_text">SUNAT</span>
+                            </div>
+                        </button>
+                        <button type="object" class="text-success" name="l10n_pe_dte_action_summary_void" icon="fa-list" invisible="not l10n_pe_dte_conflux_void_uid or l10n_pe_dte_void_status not in ('accepted','rejected','ask_for_status')">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Resumen de</span>
+                                <span class="o_stat_text">Reversion</span>
+                            </div>
+                        </button>
+                    </div>
+                </group>
+                <notebook>
+                    <page string="Electronic Retention" name="pe_electronic_retention">
+                        <group>
+                            <field name="l10n_pe_dte_conflux_void_uid" invisible="1"/>
+                            <label for="l10n_pe_dte_status"/>
+                            <div name="l10n_pe_dte_status_container">
+                                <field name="l10n_pe_dte_status" class="oe_inline" readonly="1"/>
+                            </div>
+                            <field name="l10n_pe_dte_status_response" readonly="1"/>
+                            <field name="l10n_pe_dte_void_status_response" readonly="1"/>
+                            <field name="l10n_pe_dte_void_status" readonly="1" invisible="state != 'cancel'"/>
+                            <field name="l10n_pe_dte_cancel_reason" readonly="1" invisible="state != 'cancel'"/>
+                            <field name="l10n_pe_dte_partner_status" readonly="1"/>
+                            <field name="l10n_pe_dte_file_link" widget="url" readonly="1"/>
+                            <field name="l10n_pe_dte_hash" readonly="1"/>
+                            <field name="l10n_pe_dte_pdf_file_link" widget="url" readonly="1"/>
+                            <field name="l10n_pe_dte_cdr_file_link" widget="url" readonly="1"/>
+                            <field name="l10n_pe_dte_cdr_void_file_link" widget="url" readonly="1" invisible="state != 'cancel'"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <record id="account_retention_comp_tree_view" model="ir.ui.view">
+            <field name="model">account.retention.comp</field>
+            <field name="name">account.retention.comp.tree.l10n_pe_edi</field>
+            <field name="inherit_id" ref="account_multipayment_supplier_retentions.account_retention_comp_view_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//tree/field[last()]" position="after">
+                    <field name="l10n_pe_dte_status" string="Estado SUNAT" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_account_retention_comp_void_form" model="ir.ui.view">
+            <field name="model">account.retention.comp</field>
+            <field name="name">form_l10n_pe_edi.retention.comp.void</field>
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+                <form string="Resumen de Reversion">
+                    <sheet>
+                        <div class="alert alert-success" role="alert" invisible="l10n_pe_dte_void_status != 'accepted'">
+                            <div><field name="l10n_pe_dte_void_status_response" readonly="1" class="w-auto"/></div>
+                        </div>
+                        <div class="alert alert-danger" role="alert" invisible="l10n_pe_dte_void_status != 'rejected'">
+                            <div><field name="l10n_pe_dte_void_status_response" readonly="1" class="w-auto"/></div>
+                        </div>
+                        <div class="alert alert-warning" role="alert" invisible="l10n_pe_dte_void_status != 'ask_for_status'">
+                            <div>El resumen de reversión esta siendo procesado por SUNAT</div>
+                        </div>
+                        <group>
+                            <field name="l10n_pe_dte_void_status" invisible="1"/>
+                            <field name="l10n_pe_dte_void_status_response" invisible="1"/>
+                            <field name="l10n_pe_dte_void_file_link" widget="url" readonly="1"/>
+                            <field name="l10n_pe_dte_void_pdf_file_link" widget="url" readonly="1"/>
+                            <field name="l10n_pe_dte_void_cdr_file_link" widget="url" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

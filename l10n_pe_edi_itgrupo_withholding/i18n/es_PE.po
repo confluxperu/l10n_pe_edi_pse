@@ -1,0 +1,307 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_pe_edi_itgrupo_withholding
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-18 21:32+0000\n"
+"PO-Revision-Date: 2024-01-18 21:32+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,help:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_partner_status
+msgid ""
+"\n"
+"    Status of sending the DTE to the partner:\n"
+"    - Not sent: the DTE has not been sent to the partner but it has sent to SUNAT.\n"
+"    - Sent: The DTE has been sent to the partner."
+msgstr ""
+"\n"
+"    Estado de envío del DTE al cliente:\n"
+"    - No enviado: el DTE no ha sido enviado al cliente pero si a SUNAT.\n"
+"    - Enviado: El DTE ha sido enviado al cliente."
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_itgrupo_withholding.account_retention_comp_form_view
+msgid ""
+"<span class=\"o_stat_text\">Accepted by</span>\n"
+"                                <span class=\"o_stat_text\">SUNAT</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Aceptado por</span>\n"
+"                                <span class=\"o_stat_text\">SUNAT</span>"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_itgrupo_withholding.account_retention_comp_form_view
+msgid ""
+"<span class=\"o_stat_text\">Check</span>\n"
+"                                <span class=\"o_stat_text\">Status</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Verificar</span>\n"
+"                                <span class=\"o_stat_text\">Estado</span>"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_itgrupo_withholding.account_retention_comp_form_view
+msgid ""
+"<span class=\"o_stat_text\">Send to</span>\n"
+"                                <span class=\"o_stat_text\">SUNAT</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Enviar a</span>\n"
+"                                <span class=\"o_stat_text\">SUNAT</span>"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__accepted
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__accepted
+msgid "Accepted"
+msgstr "Aceptado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__objected
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__objected
+msgid "Accepted With Objections"
+msgstr "Aceptado con observaciones"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__ask_for_status
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__ask_for_status
+msgid "Ask For Status"
+msgstr "Solicitar estado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_cdr_void_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cdr_void_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cdr_void_file_link
+msgid "CDR Void file"
+msgstr "Archivo CDR Anulación"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_cdr_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cdr_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cdr_file_link
+msgid "CDR file"
+msgstr "Archivo CDR"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cancel_reason
+msgid "Cancel Reason"
+msgstr "Motivo de anulación"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_itgrupo_withholding.account_retention_comp_form_view
+msgid "Cancel in SUNAT"
+msgstr "Anular en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__cancelled
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__cancelled
+msgid "Cancelled"
+msgstr "Anulado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.actions.server,name:l10n_pe_edi_itgrupo_withholding.action_l10n_pe_dte_send_check_multi_retention
+msgid "Check status at SUNAT"
+msgstr "Verificar estado en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid ""
+"Comprobante de retencion <span style='color: #21b799;'>%s</span> Reversion "
+"emitida"
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid ""
+"Comunicacion de baja no cuenta con el diario o identificador del PSE \n"
+" Reversion: %s \n"
+" "
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid "Conflux web service url not provided"
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_conflux_uid
+msgid "DTE Conflux UID"
+msgstr "Identificador del DTE en Conflux"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_hash
+msgid "DTE Hash"
+msgstr "Hash del DTE"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_pdf_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_pdf_file_link
+msgid "DTE PDF file"
+msgstr "Archivo PDF del DTE"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_file
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_file_link
+msgid "DTE file"
+msgstr "Archivo DTE"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model_terms:ir.ui.view,arch_db:l10n_pe_edi_itgrupo_withholding.account_retention_comp_form_view
+msgid "Electronic Retention"
+msgstr "Comprobante de Retención Electrónica"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid "Exception decoding JSON response from Conflux: %s "
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_withholding_type
+msgid "IGV Retention Type"
+msgstr "Tipo de Retención IGV"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid ""
+"It's not possible to cancel the despatch. Please check the log details \n"
+" Despatch: %s \n"
+" "
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__manual
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__manual
+msgid "Manual"
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_partner_status__not_sent
+msgid "Not Sent"
+msgstr "No enviado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid "Null document"
+msgstr "Documento anulado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_partner_status
+msgid "Partner DTE status"
+msgstr "Estado del DTE del cliente"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__not_sent
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__not_sent
+msgid "Pending To Be Sent"
+msgstr "Pendiente de envío"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,help:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_cancel_reason
+msgid "Reason given by the user to cancel this move"
+msgstr "Motivo dado por el usuario para anular este movimiento"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_status__rejected
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_void_status__rejected
+msgid "Rejected"
+msgstr "Rechazado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_void_status
+msgid "SUNAT DTE Void status"
+msgstr "Estado del DTE de anulación en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_void_status_response
+msgid "SUNAT DTE Void status response"
+msgstr "Respuesta del estado del DTE de anulación en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_status
+msgid "SUNAT DTE status"
+msgstr "Estado del DTE en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,field_description:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_status_response
+msgid "SUNAT DTE status response"
+msgstr "Respuesta del estado del DTE en SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.actions.server,name:l10n_pe_edi_itgrupo_withholding.action_l10n_pe_dte_send_multi_retention
+msgid "Send to PSE/OSE/SUNAT"
+msgstr "Enviar a PSE/OSE/SUNAT"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_partner_status__sent
+msgid "Sent"
+msgstr "Enviado"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,help:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_status
+msgid ""
+"Status of sending the DTE to the SUNAT:\n"
+"    - Not sent: the DTE has not been sent to SUNAT but it has created.\n"
+"    - Ask For Status: The DTE is asking for its status to the SUNAT.\n"
+"    - Accepted: The DTE has been accepted by SUNAT.\n"
+"    - Accepted With Objections: The DTE has been accepted with objections by SUNAT.\n"
+"    - Rejected: The DTE has been rejected by SUNAT.\n"
+"    - Manual: The DTE is sent manually, i.e.: the DTE will not be sending manually."
+msgstr ""
+"Estado de envío del DTE a SUNAT:\n"
+"    - No enviado: el DTE no ha sido enviado a SUNAT pero si creado.\n"
+"    - Solicitar estado: El DTE está solicitando su estado a SUNAT.\n"
+"    - Aceptado: El DTE ha sido aceptado por SUNAT.\n"
+"    - Aceptado con observaciones: El DTE ha sido aceptado con observaciones por SUNAT.\n"
+"    - Rechazado: El DTE ha sido rechazado por SUNAT.\n"
+"    - Manual: El DTE es enviado manualmente, es decir: el DTE no será enviado automáticamente."
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields,help:l10n_pe_edi_itgrupo_withholding.field_account_retention_comp__l10n_pe_dte_void_status
+msgid ""
+"Status of sending the Void DTE to the SUNAT:\n"
+"    - Not sent: the DTE has not been sent to SUNAT but it has created.\n"
+"    - Ask For Status: The DTE is asking for its status to the SUNAT.\n"
+"    - Accepted: The DTE has been accepted by SUNAT.\n"
+"    - Accepted With Objections: The DTE has been accepted with objections by SUNAT.\n"
+"    - Rejected: The DTE has been rejected by SUNAT.\n"
+"    - Manual: The DTE is sent manually, i.e.: the DTE will not be sending manually."
+msgstr ""
+"Estado de envío del DTE de anulación a SUNAT:\n"
+"    - No enviado: el DTE no ha sido enviado a SUNAT pero si creado.\n"
+"    - Solicitar estado: El DTE está solicitando su estado a SUNAT.\n"
+"    - Aceptado: El DTE ha sido aceptado por SUNAT.\n"
+"    - Aceptado con observaciones: El DTE ha sido aceptado con observaciones por SUNAT.\n"
+"    - Rechazado: El DTE ha sido rechazado por SUNAT.\n"
+"    - Manual: El DTE es enviado manualmente, es decir: el DTE no será enviado automáticamente."
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_withholding_type__01
+msgid "Tasa 3%"
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model.fields.selection,name:l10n_pe_edi_itgrupo_withholding.selection__account_retention_comp__l10n_pe_dte_withholding_type__02
+msgid "Tasa 6%"
+msgstr ""
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: code:addons/l10n_pe_edi_itgrupo_withholding/models/account_retention_comp.py:0
+#, python-format
+msgid "There's problems to connecte with Conflux Server"
+msgstr "Se presentaron problemas para conectarse con el servidor de Conflux"
+
+#. module: l10n_pe_edi_itgrupo_withholding
+#: model:ir.model,name:l10n_pe_edi_itgrupo_withholding.model_account_retention_comp
+msgid "account.retention.comp"
+msgstr ""
