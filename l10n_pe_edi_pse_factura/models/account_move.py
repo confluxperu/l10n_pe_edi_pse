@@ -187,6 +187,9 @@ class AccountMove(models.Model):
         if self.amount_total_signed<700:
             return {}
 
+        if self._l10n_pe_edi_get_spot():
+            return {}
+
         amount_total = self.amount_total - self._l10n_pe_edi_get_free_amount()
         amount_total_signed = self.amount_total_signed - self._l10n_pe_edi_get_free_amount()
 
