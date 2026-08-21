@@ -72,9 +72,9 @@
             <field name="name">account.retention.comp.tree.l10n_pe_edi</field>
             <field name="inherit_id" ref="account_multipayment_supplier_retentions.account_retention_comp_view_tree" />
             <field name="arch" type="xml">
-                <xpath expr="//tree/field[last()]" position="after">
+                <field name="company_id" position="before">
                     <field name="l10n_pe_dte_status" string="Estado SUNAT" optional="show"/>
-                </xpath>
+                </field>
             </field>
         </record>
 
