@@ -15,7 +15,7 @@ Integracion con emision de comprobantes de retencion con modulo itgrupo
     'version': '19.0.1.0.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['l10n_pe_edi_pse_factura', 'l10n_pe_Edi_pse_itgrupo'],
+    'depends': ['l10n_pe_edi_pse_factura', 'l10n_pe_edi_pse_itgrupo'],
 
     # always loaded
     'data': [
