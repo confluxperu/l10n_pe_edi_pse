@@ -1,0 +1,87 @@
+<odoo>
+    <record id="view_logistic_despatch_form_edi_carrier" model="ir.ui.view">
+        <field name="name">view.logistic.despatch.form.l10n_pe_edi_despatch_carrier</field>
+        <field name="model">logistic.despatch</field>
+        <field name="inherit_id" ref="logistic.view_logistic_despatch_form" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+                <attribute name="string">Receptor</attribute>
+            </field>
+            <field name="partner_id" position="before">
+                <field name="l10n_pe_edi_type"/>
+            </field>
+            <field name="partner_id" position="after">
+                <field name="partner_id" string="Remitente" invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_receiver_id" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="l10n_pe_edi_shipment_reason" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="l10n_pe_edi_transport_mode" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="start_date" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="l10n_pe_edi_invoice_number" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="carrier_id" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="l10n_pe_edi_mtc_authorization" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="l10n_pe_edi_seller_supplier_id" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="l10n_pe_edi_buyer_id" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="packages" position="attributes">
+                <attribute name="invisible">l10n_pe_edi_type == '31'</attribute>
+            </field>
+            <field name="total_weight" position="before">
+                <field name="l10n_pe_edi_subcontractor_id" invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_freight_payer_id" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="l10n_pe_edi_vehicle_1" position="after">
+                <field name="l10n_pe_edi_vehicle_tuc" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="l10n_pe_edi_vehicle_2" position="after">
+                <field name="l10n_pe_edi_vehicle_2_tuc" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="l10n_pe_edi_vehicle_3" position="after">
+                <field name="l10n_pe_edi_vehicle_3_tuc" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="l10n_pe_edi_shipment_description" position="after">
+                <field name="l10n_pe_edi_is_subcontracted_transport" invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_is_sender_freight_payer" invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_is_subcontractor_freight_payer" invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_is_third_party_freight_payer" invisible="l10n_pe_edi_type != '31'"/>
+            </field>
+            <field name="note" position="before">
+                <label for="l10n_pe_edi_despatch_description" string="Detalle de Guia"  invisible="l10n_pe_edi_type != '31'"/>
+                <field name="l10n_pe_edi_despatch_description" invisible="l10n_pe_edi_type != '31'" />
+            </field>
+        </field>
+    </record>
+    <record id="logistic.action_logistic_despatch_tree" model="ir.actions.act_window">
+        <field name="domain">[('l10n_pe_edi_type','=','09')]</field>
+    </record>
+    <record id="action_logistic_despatch_carrier_tree" model="ir.actions.act_window">
+        <field name="name">Guias Transportista</field>
+        <field name="res_model">logistic.despatch</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('l10n_pe_edi_type','=','31')]</field>
+        <field name="context">{'default_l10n_pe_edi_type': '31'}</field>
+        <field name="search_view_id" ref="logistic.view_logistic_despatch_search"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Clic aqui para crear una guia de transportista.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_logistic_despatch_carrier" action="action_logistic_despatch_carrier_tree" name="Guias Transportista" parent="logistic.logistic_operations" sequence="10"/>
+</odoo>
