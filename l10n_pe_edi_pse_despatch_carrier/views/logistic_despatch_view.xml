@@ -62,8 +62,9 @@
                 <field name="l10n_pe_edi_is_third_party_freight_payer" invisible="l10n_pe_edi_type != '31'"/>
             </field>
             <field name="note" position="before">
-                <label for="l10n_pe_edi_despatch_description" string="Detalle de Guia"  invisible="l10n_pe_edi_type != '31'"/>
-                <field name="l10n_pe_edi_despatch_description" invisible="l10n_pe_edi_type != '31'" />
+                <group invisible="l10n_pe_edi_type != '31'">
+                    <field name="l10n_pe_edi_despatch_description" string="Detalle de Guia" nolabel="0" colspan="2"/>
+                </group>
             </field>
         </field>
     </record>
