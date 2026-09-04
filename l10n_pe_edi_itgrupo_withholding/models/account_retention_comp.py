@@ -336,14 +336,13 @@ class AccountMove(models.Model):
                     "documento_relacionado_fecha_de_emision": line.invoice_date_it.strftime('%Y-%m-%d'),
                     "documento_relacionado_moneda": line.invoice_id.currency_id.name,
                     "documento_relacionado_total": abs(line.invoice_id.move_id.amount_total), #EN MONEDA DEL COMPROBANTE
-                    "pago_fecha": line.payment_date.strftime('%Y-%m-%d'),
+                    "pago_fecha": line.multipayment_line_id.main_id.payment_date.strftime('%Y-%m-%d'),
                     "pago_numero": "1",
-                    #SE ESTA MODIFICANDO POR APURO
-                    "pago_total_sin_retencion": line.debit if line.multipayment_line_id.currency_id.name=='PEN' else round(line.debit/line.tc,2), #EN MONEDA DEL COMPROBANTE
-                    "tipo_de_cambio": line.tc,
-                    "tipo_de_cambio_fecha": line.payment_date.strftime('%Y-%m-%d'),
+                    "pago_total_sin_retencion": line.debit if line.multipayment_line_id.currency_id.name=='PEN' else round(line.debit/line.multipayment_line_id.tc,2), #EN MONEDA DEL COMPROBANTE
+                    "tipo_de_cambio": line.multipayment_line_id.tc,
+                    "tipo_de_cambio_fecha": line.multipayment_line_id.main_id.payment_date.strftime('%Y-%m-%d'),
                     "importe_retenido": importe_retenido, #EN SOLES
-                    "importe_retenido_fecha": line.payment_date.strftime('%Y-%m-%d'),
+                    "importe_retenido_fecha": line.multipayment_line_id.main_id.payment_date.strftime('%Y-%m-%d'),
                     "importe_pagado_con_retencion": importe_pagado_con_retencion, #EN SOLES
                 })
             elif line.type_document_id.code=='07':
