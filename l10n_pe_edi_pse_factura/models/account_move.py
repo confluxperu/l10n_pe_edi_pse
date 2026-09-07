@@ -10,23 +10,6 @@ log = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    def _auto_init(self):
-        res = super()._auto_init()
-        if index_exists(self.env.cr, "account_move_unique_name_latam"):
-            drop_index(self.env.cr, "account_move_unique_name", self._table)
-            drop_index(self.env.cr, "account_move_unique_name_latam", self._table)
-            self.env.cr.execute("""
-                CREATE UNIQUE INDEX account_move_unique_name
-                                 ON account_move(name, journal_id)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND (l10n_latam_document_type_id IS NULL OR move_type NOT IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
-                CREATE UNIQUE INDEX account_move_unique_name_latam
-                                 ON account_move(name, journal_id, l10n_latam_document_type_id, company_id)
-                              WHERE (state = 'posted' AND name != '/'
-                                AND (l10n_latam_document_type_id IS NOT NULL AND move_type IN ('in_invoice', 'in_refund', 'in_receipt','out_invoice','out_refund')));
-            """)
-        return res
-
     l10n_pe_edi_pse_uid = fields.Char(string='PSE Unique identifier', copy=False)
     l10n_pe_edi_pse_cancel_uid = fields.Char(string='PSE Identifier for Cancellation', copy=False)
     l10n_pe_edi_pse_attachment_ids = fields.Many2many('ir.attachment', string='EDI Attachments')
