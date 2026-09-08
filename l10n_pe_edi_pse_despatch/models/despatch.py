@@ -93,6 +93,10 @@ class LogisticDespatch(models.Model):
     l10n_pe_edi_cdr_void_file_link = fields.Char(string='CDR Void file', compute='_compute_l10n_pe_edi_links')
 
     l10n_pe_edi_mtc_authorization = fields.Char('Autorizacion MTC', related='carrier_id.l10n_pe_edi_mtc_number', readonly=False)
+    driver_2_id = fields.Many2one('res.partner', string='Vehicle Driver 2', domain=[(
+        'l10n_pe_edi_operator_license', '!=', False)], copy=True)
+    driver_3_id = fields.Many2one('res.partner', string='Vehicle Driver 3', domain=[(
+        'l10n_pe_edi_operator_license', '!=', False)], copy=True)
     l10n_pe_edi_vehicle_1 = fields.Many2one('l10n_pe_edi.vehicle','Vehiculo Primario')
     l10n_pe_edi_vehicle_2 = fields.Many2one('l10n_pe_edi.vehicle','Vehiculo Secundario 1')
     l10n_pe_edi_vehicle_3 = fields.Many2one('l10n_pe_edi.vehicle','Vehiculo Secundario 2')
@@ -380,6 +384,29 @@ class LogisticDespatch(models.Model):
                 'operador_numero_de_documeto': self.driver_id.vat,
                 'operador_licencia': self.driver_id.l10n_pe_edi_operator_license or None,
             })
+
+        if self.driver_2_id:
+            driver_2_fullname = self.driver_2_id.name
+            driver_2_fullname = driver_2_fullname.split(' ')
+            _despatch.update({
+                'operador_nombres_2': driver_2_fullname[0], #first block
+                'operador_apellidos_2': driver_2_fullname[-2:], #last 2 blocks
+                'operador_tipo_de_documento_2': self.driver_2_id.l10n_latam_identification_type_id.l10n_pe_vat_code,
+                'operador_numero_de_documeto_2': self.driver_2_id.vat,
+                'operador_licencia_2': self.driver_2_id.l10n_pe_edi_operator_license or None,
+            })
+
+        if self.driver_3_id:
+            driver_3_fullname = self.driver_3_id.name
+            driver_3_fullname = driver_3_fullname.split(' ')
+            _despatch.update({
+                'operador_nombres_3': driver_3_fullname[0], #first block
+                'operador_apellidos_3': driver_3_fullname[-2:], #last 2 blocks
+                'operador_tipo_de_documento_3': self.driver_3_id.l10n_latam_identification_type_id.l10n_pe_vat_code,
+                'operador_numero_de_documeto_3': self.driver_3_id.vat,
+                'operador_licencia_3': self.driver_3_id.l10n_pe_edi_operator_license or None,
+            })
+
         if self.carrier_id:
             _despatch.update({
                 'portador_denominacion': self.carrier_id.name,
