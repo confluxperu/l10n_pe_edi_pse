@@ -88,6 +88,8 @@
                             </group>
                             <group>
                                 <field name="driver_id" readonly="state != 'draft'" required="l10n_pe_edi_transport_mode == '02'" />
+                                <field name="driver_2_id" readonly="state != 'draft'" required="l10n_pe_edi_transport_mode == '02'" />
+                                <field name="driver_3_id" readonly="state != 'draft'" required="l10n_pe_edi_transport_mode == '02'" />
                                 <field name="l10n_pe_edi_vehicle_1" required="l10n_pe_edi_transport_mode == '02'" readonly="state != 'draft'"/>
                                 <field name="l10n_pe_edi_vehicle_2" readonly="state != 'draft'"/>
                                 <field name="l10n_pe_edi_vehicle_3" readonly="state != 'draft'"/>
