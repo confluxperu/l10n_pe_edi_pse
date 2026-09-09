@@ -269,7 +269,7 @@ class AccountEdiFormat(models.Model):
             conflux_dte["codigo_detraccion"]=spot['payment_means_id']
             conflux_dte['medio_de_pago_detraccion']=spot['payment_means_code']
 
-         if conflux_dte['total_exportacion'] > 0 and conflux_dte['total_prepagado']>0:
+        if conflux_dte['total_exportacion'] > 0 and conflux_dte['total_prepagado']>0:
             conflux_dte['total_exportacion'] += conflux_dte['total_prepagado']
 
         if record.ref and record.l10n_latam_document_type_id.internal_type == 'invoice':
