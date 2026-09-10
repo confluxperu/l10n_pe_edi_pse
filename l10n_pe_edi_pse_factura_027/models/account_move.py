@@ -16,6 +16,21 @@ class AccountInvoice(models.Model):
 
     def _l10n_pe_edi_get_spot(self):
         res = super()._l10n_pe_edi_get_spot()
-        if self.amount_total_signed<400 and self.l10n_pe_edi_operation_type=='1004':
-            return {}
+        if self.l10n_pe_edi_operation_type=='1004':
+            if self.amount_total_signed<400:
+                return {}
+            else:
+                amount_total = self.amount_total
+                max_percent = res['payment_percent']
+                if self.l10n_pe_dte_dettran_val_ref_serv_trans>amount_total:
+                    if self.currency_id.name=='PEN':
+                        amount_total = self.l10n_pe_dte_dettran_val_ref_serv_trans
+                    else
+                        amount_total = self.l10n_pe_dte_dettran_val_ref_serv_trans* (self.amount_total_signed/self.amount_total)
+
+                amount_in_pen = self.currency_id._convert(
+                    amount_total, pen_currency, self.company_id, self.invoice_date or fields.Date.today()
+                )
+                res['spot_amount'] = float_round(amount_total * (max_percent / 100.0), precision_rounding=1 if self.currency_id == pen_currency else self.currency_id.rounding)
+                res['amount']: float_round(amount_in_pen * (max_percent / 100.0), precision_rounding=1)
         return res
