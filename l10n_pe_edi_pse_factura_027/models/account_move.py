@@ -13,3 +13,9 @@ class AccountInvoice(models.Model):
     l10n_pe_dte_dettran_val_ref_carga_efec = fields.Float('Carga Efectiva (TM)', digits=(9,3))
     l10n_pe_dte_dettran_val_ref_carga_util = fields.Float('Carga Util (TM)', digits=(9,3))
     l10n_pe_dte_dettran_detalle_viaje = fields.Char('Detalle de Viaje')
+
+    def _l10n_pe_edi_get_spot(self):
+        res = super()._l10n_pe_edi_get_spot()
+        if self.amount_total_signed<400 and self.l10n_pe_edi_operation_type=='1004':
+            return {}
+        return res

@@ -186,7 +186,7 @@ class AccountMove(models.Model):
     
     def _l10n_pe_edi_get_spot(self):
         res = super()._l10n_pe_edi_get_spot()
-        if self.amount_total_signed<700:
+        if self.amount_total_signed<700 and self.l10n_pe_edi_operation_type!='1004':
             return {}
         return res
 
