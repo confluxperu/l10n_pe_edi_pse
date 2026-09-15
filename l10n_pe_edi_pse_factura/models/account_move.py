@@ -151,10 +151,10 @@ class AccountMove(models.Model):
             'retention_amount': float_round(self.amount_total * (percent / 100.0), precision_rounding=0.01),
             'amount': float_round(self.amount_total_signed * (percent / 100.0), precision_rounding=1),
         }
-    
+
     def _l10n_pe_edi_get_spot(self):
         res = super()._l10n_pe_edi_get_spot()
-        if self.amount_total_signed<700:
+        if self.amount_total_signed<700 and self.l10n_pe_edi_operation_type!='1004':
             return {}
         return res
     
