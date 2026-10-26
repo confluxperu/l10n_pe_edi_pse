@@ -76,12 +76,6 @@ class AccountEdiFormat(models.Model):
             attachment_ids.append(created.id)
         return attachment_ids
 
-    def _generate_edi_invoice_bstr(self, invoice):
-        log.info('***************** _generate_edi_invoice_bstr *****************')
-        res = super()._generate_edi_invoice_bstr(invoice)
-        log.info(res)
-        return res
-
     def _l10n_pe_edi_get_edi_line_values_conflux(self, line):
         price_precision = self.env['decimal.precision'].precision_get('Product Price')
         default_uom = 'NIU'
@@ -91,11 +85,12 @@ class AccountEdiFormat(models.Model):
         igv_type = '10'
         isc_type = ''
         is_free = False
+        is_charge = False
 
         igv_amount = 0
         isc_amount = 0
         icbper_amount = 0
-
+        charge_amount = 0
         
 
         taxes_res = line.tax_ids.compute_all(
@@ -115,12 +110,12 @@ class AccountEdiFormat(models.Model):
                 isc_amount+=tax_dict['amount']
             if tax.tax_group_id.name == 'ICBPER':
                 icbper_amount+=tax_dict['amount']
+            if tax.tax_group_id.name == 'OTROS' or tax.tax_group_id.name == 'RC':
+                charge_amount+=tax_dict['amount']
             if tax.tax_group_id.name in ('IGV','EXO','INA','EXP','GRA'):
                 igv_type = line.l10n_pe_edi_affectation_reason
             if tax.tax_group_id.name == 'GRA':
                 is_free = True
-        log.info('***************** taxes_res *****************')
-        log.info(taxes_res)
         valor_unitario = float_round(line.price_subtotal / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
         precio_unitario = float_round(line.price_total / abs(line.quantity), precision_digits=price_precision) if line.quantity else 0.0
         if line.discount==100:
@@ -136,9 +131,9 @@ class AccountEdiFormat(models.Model):
             "cantidad":abs(line.quantity),
             "unidad_de_medida":line.product_uom_id.l10n_pe_edi_measure_unit_code if line.product_uom_id.l10n_pe_edi_measure_unit_code else default_uom,
             'valor_unitario': valor_unitario,
-            'precio_unitario': precio_unitario,
+            'precio_unitario': precio_unitario - charge_amount/abs(line.quantity) if line.quantity else precio_unitario,
             "subtotal":line.price_subtotal if not is_free else 0,
-            "total":line.price_total if not is_free else icbper_amount,
+            "total":line.price_subtotal + igv_amount + isc_amount + icbper_amount if not is_free else icbper_amount,
             "tipo_de_igv": igv_type,
             "igv":igv_amount,
             "isc":isc_amount,
@@ -218,13 +213,15 @@ class AccountEdiFormat(models.Model):
             "items": []
         }
 
+        descuento_importe_02 = 0
+        descuento_importe_03 = 0
+        descuento_base_02 = 0
+        descuento_base_03 = 0
+
         for line in invoice.line_ids.filtered(lambda x: x.display_type == "product"):
             if invoice.is_invoice(True):
+                
                 if any(
-                    tax.l10n_pe_edi_tax_code in ["1000"] for tax in line.tax_ids
-                ):
-                    conflux_dte['total_gravada'] += line.price_subtotal
-                elif any(
                     tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
                 ):
                     conflux_dte['total_gratuita'] += line.price_subtotal
@@ -241,25 +238,39 @@ class AccountEdiFormat(models.Model):
                 ):
                     conflux_dte['total_exportacion'] += line.price_subtotal
 
-                 if line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
-                    conflux_dte['total_prepagado']+=abs(line.price_total)
+                if line.price_subtotal<0 and line.l10n_pe_edi_allowance_charge_reason_code in ('02','00'):
+                    descuento_importe_02+=abs(line.price_subtotal)
+                    continue
+                if line.price_subtotal<0 and not line.l10n_pe_edi_downpayment_line and (line.l10n_pe_edi_allowance_charge_reason_code=='03' or is_exo_or_unaffected):
+                    descuento_importe_03+=abs(line.price_subtotal)
+                    continue
 
-                conflux_dte['items'].append(self._l10n_pe_edi_get_edi_line_values_conflux(line))
+                if not line.l10n_pe_edi_downpayment_line and line.price_subtotal<0:
+                    if line.l10n_pe_edi_affectation_reason=='10':
+                        descuento_importe_02+=abs(line.price_subtotal)
+                    else:
+                        descuento_importe_03+=abs(line.price_subtotal)
+                    continue
+                else:
+                    if line.l10n_pe_edi_affectation_reason=='10':
+                        descuento_base_02+=abs(line.price_subtotal)
+                    else:
+                        descuento_base_03+=abs(line.price_subtotal)
+                    conflux_dte['items'].append(self._l10n_pe_edi_get_edi_line_values_conflux(line))
 
-        for line in invoice.line_ids.filtered(lambda x: x.display_type == "tax"):
-            if invoice.is_invoice(True):
-                if line.tax_group_id.name == "IGV":
-                    conflux_dte['total_igv'] += line.amount_currency
-                if line.tax_group_id.name == "ISC":
-                    conflux_dte['total_isc'] += line.amount_currency
-                if line.tax_group_id.name == "ICBPER":
-                    conflux_dte['total_icbper'] += line.amount_currency
+        for subtotal in invoice.tax_totals['subtotals']:
+            for tax_group in subtotal['tax_groups']:
+                if tax_group['group_name'] == 'IGV':
+                    conflux_dte['total_gravada'] += round(tax_group['base_amount_currency'], 2)
+                    conflux_dte['total_igv'] += round(tax_group['tax_amount_currency'], 2)
+                if tax_group['group_name'] == 'ISC':
+                    conflux_dte['total_isc'] += round(tax_group['tax_amount'], 2)
+                if tax_group['group_name'] == 'ICBPER':
+                    conflux_dte['total_icbper'] += round(tax_group['tax_amount'], 2)
+                if tax_group['group_name'] == 'OTROS' or tax_group['group_name'] == 'RC':
+                    conflux_dte['total_otros_cargos'] += round(tax_group['tax_amount'], 2)
 
-        conflux_dte['total_igv'] = sign * conflux_dte['total_igv']
-        conflux_dte['total_isc'] = sign * conflux_dte['total_isc']
-        conflux_dte['total_icbper'] = sign * conflux_dte['total_icbper']
-
-        conflux_dte['total'] = conflux_dte['total_gravada']+conflux_dte['total_igv']+conflux_dte['total_exonerada']+conflux_dte['total_inafecta']+conflux_dte['total_exportacion']+conflux_dte['total_isc']+conflux_dte['total_icbper']
+        conflux_dte['total'] = abs(invoice.amount_total_in_currency_signed)
         
         if invoice._l10n_pe_edi_get_spot():
             spot = invoice._l10n_pe_edi_get_spot()
@@ -285,15 +296,15 @@ class AccountEdiFormat(models.Model):
         if record.invoice_payment_term_id:
             conflux_dte['condiciones_de_pago'] = record.invoice_payment_term_id.name
 
-        '''if descuento_importe_02>0:
+        if descuento_importe_02>0:
             conflux_dte["descuento_tipo"]="02"
-            conflux_dte["descuento_base"]=descuento_base
+            conflux_dte["descuento_base"]=descuento_base_02
             conflux_dte["descuento_importe"]=descuento_importe_02
         
         if descuento_importe_03>0:
             conflux_dte["descuento_tipo"]="03"
-            conflux_dte["descuento_base"]=descuento_base
-            conflux_dte["descuento_importe"]=descuento_importe_03'''
+            conflux_dte["descuento_base"]=descuento_base_03
+            conflux_dte["descuento_importe"]=descuento_importe_03
 
 
         if record.l10n_latam_document_type_id.code=='07':
