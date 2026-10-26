@@ -31,4 +31,7 @@ class AccountEdiFormat(models.Model):
                                 + (invoice.partner_id.province_id and ', ' + invoice.partner_id.province_id.name or '') \
                                 + (invoice.partner_id.state_id and ', ' + invoice.partner_id.state_id.name or '') \
                                 + (invoice.partner_id.country_id and ', ' + invoice.partner_id.country_id.name or '')
+
+        if res["total_gratuita"]>0:
+            res["total"] = res['total_gravada'] + res['total_igv'] + res['total_isc'] + res['total_icbper'] + res['total_exonerada'] + res['total_inafecta'] + res['total_exportacion']
         return res
