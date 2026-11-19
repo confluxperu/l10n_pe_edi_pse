@@ -339,7 +339,7 @@ class AccountMove(models.Model):
     
     def action_l10n_pe_edi_pse_status(self):
         for rec in self:
-            if rec.l10n_pe_edi_pse_status=='ask_for_status' and rec.l10n_pe_edi_pse_uid:
+            if rec.l10n_pe_edi_pse_status in ('ask_for_status','rejected') and rec.l10n_pe_edi_pse_uid:
                 docs = rec.edi_document_ids.filtered(lambda d: d.state in ('sent',))
                 edi_filename = '%s-%s-%s' % (
                     rec.company_id.vat,
