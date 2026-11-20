@@ -22,6 +22,7 @@ DEFAULT_CONFLUX_FACTURA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_
 DEFAULT_CONFLUX_FACTURA_ESTADO_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/status/'
 DEFAULT_CONFLUX_FACTURA_BAJA_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/account_einvoice/invoice/%s/anular/'
 DEFAULT_CONFLUX_VOID_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/einvoice_void/void_ra/%s/'
+DEFAULT_CONFLUX_VOID_RESUMEN_ENDPOINT = 'https://einvoice.conflux.pe/api/v/1/einvoice_summary/summary/%s/'
 
 def request_json(token="", method="post", url=None, data_dict=None):
     s = requests.Session()
@@ -217,10 +218,13 @@ class AccountEdiFormat(models.Model):
         descuento_importe_03 = 0
         descuento_base_02 = 0
         descuento_base_03 = 0
+        cash_rounding = 0
 
-        for line in invoice.line_ids.filtered(lambda x: x.display_type == "product"):
+        for line in invoice.line_ids.filtered(lambda x: x.display_type in ["product","rounding"]):
             if invoice.is_invoice(True):
-                
+                if line.display_type == "rounding":
+                    cash_rounding += line.amount_currency
+                    continue
                 if any(
                     tax.l10n_pe_edi_tax_code in ["9996"] for tax in line.tax_ids
                 ):
@@ -270,7 +274,7 @@ class AccountEdiFormat(models.Model):
                 if tax_group['group_name'] == 'OTROS' or tax_group['group_name'] == 'RC':
                     conflux_dte['total_otros_cargos'] += round(tax_group['tax_amount'], 2)
 
-        conflux_dte['total'] = abs(invoice.amount_total_in_currency_signed)
+        conflux_dte['total'] = abs(invoice.amount_total_in_currency_signed) + cash_rounding
         
         if invoice._l10n_pe_edi_get_spot():
             spot = invoice._l10n_pe_edi_get_spot()
@@ -566,7 +570,8 @@ class AccountEdiFormat(models.Model):
 
         if result.get('message') and result.get('status')=='error':
             error_message = result['message']
-            return {'error': error_message, 'blocking_level': 'error'}
+            if 'debe estar con estado abierto' not in result['message']:
+                return {'error': error_message, 'blocking_level': 'error'}
 
         void_uid = 'NO_VOID_UID'
         if result.get('status')=='success' and result['data'].get('comunicacion_de_baja', False):
@@ -574,12 +579,17 @@ class AccountEdiFormat(models.Model):
 
         edi_void_status = 'ask_for_status'
 
-        return {'void_uid': void_uid, 'pse_void_status':edi_void_status}
+        return {'success': True, 'cdr': 'CDR-NO-DISPONIBLE','void_uid': void_uid, 'pse_void_status':edi_void_status}
 
     def _l10n_pe_edi_pse_cancel_invoices_step_2_conflux(self, company, invoice):
         if invoice.l10n_pe_edi_pse_cancel_uid and invoice.l10n_pe_edi_pse_cancel_uid!='NO_VOID_UID':
             try:
-                result = request_json(url=DEFAULT_CONFLUX_VOID_ENDPOINT % invoice.l10n_pe_edi_pse_cancel_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+                if invoice.l10n_latam_document_type_id.code=='01' or invoice.l10n_pe_edi_rectification_ref_type.code=='01':
+                    result = request_json(url=DEFAULT_CONFLUX_VOID_ENDPOINT % invoice.l10n_pe_edi_pse_cancel_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+                elif invoice.l10n_latam_document_type_id.code=='03' or invoice.l10n_pe_edi_rectification_ref_type.code=='03':
+                    result = request_json(url=DEFAULT_CONFLUX_VOID_RESUMEN_ENDPOINT % invoice.l10n_pe_edi_pse_cancel_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+                else:
+                    return {'error': 'The document type is not supported for cancellation', 'blocking_level': 'error'}
             except KeyError:
                 return {'error': self._l10n_pe_edi_get_general_error_messages()['L10NPE18'], 'blocking_level': 'error'}
             except AccessError:
@@ -620,6 +630,7 @@ class AccountEdiFormat(models.Model):
             return {
                 'success': True, 
                 'cdr': 'CDR-NO-DISPONIBLE',
+                'void_uid': invoice.l10n_pe_edi_pse_cancel_uid,
                 'pse_void_status':edi_void_status,
                 'pse_void_status_response': pse_void_status_response,
                 'extra_msg': extra_msg,
@@ -642,15 +653,42 @@ class AccountEdiFormat(models.Model):
                     error_message = result['message']
                 return {'error': error_message, 'blocking_level': 'error'}
 
+            if result.get('estado') != 'annulled':
+                return {'error': 'The invoice is not annulled in SUNAT, please check the status of the invoice before trying to cancel it.', 'blocking_level': 'error'}
+
             extra_msg = ''
             xml_url = None
             cdr_url = None
             pdf_url = None
+            void_uid = 'NO_VOID_UID'
+            log.info(result)
+
+            if result.get('comunicacion_de_baja')!="" and result.get('comunicacion_de_baja')!=None:
+                void_uid = result.get('comunicacion_de_baja')
+
+            elif result.get('resumen_diario_baja')!="" and result.get('resumen_diario_baja')!=None:
+                void_uid = result.get('resumen_diario_baja')
+                if result.get('baja_aceptada', False):
+                    try:
+                        result_resumen_baja = {}
+                        if invoice.l10n_latam_document_type_id.code=='03' or invoice.l10n_pe_edi_rectification_ref_type.code=='03':
+                            result_resumen_baja = request_json(url=DEFAULT_CONFLUX_VOID_RESUMEN_ENDPOINT % void_uid, method='get', token=company.l10n_pe_edi_pse_secret_key, data_dict={})
+                        log.info(result_resumen_baja)
+                    except Exception:
+                        log.info('Error al consultar estado de resumen diario de baja')
+                    
+                    if result_resumen_baja.get('enlace_del_xml', False):
+                        xml_url = result_resumen_baja['enlace_del_xml']
+                    if result_resumen_baja.get('enlace_del_pdf', False):
+                        pdf_url = result_resumen_baja['enlace_del_pdf']
+                    if result_resumen_baja.get('enlace_del_cdr', False):
+                        cdr_url = result_resumen_baja['enlace_del_cdr']
+                    
+
             edi_void_status = 'ask_for_status'
             pse_void_status_response = ''
             if result.get('baja_aceptada', False):
                 edi_void_status = 'accepted'
-                pse_void_status_response = _('Void accepted by SUNAT - Files cannot be provided')
             if result.get('baja_rechazada', False):
                 edi_void_status = 'rejected'
                 pse_void_status_response = _('Void rejected by SUNAT - Files cannot be provided')
@@ -658,6 +696,7 @@ class AccountEdiFormat(models.Model):
             return {
                 'success': True, 
                 'cdr': 'CDR-NO-DISPONIBLE',
+                'void_uid': void_uid,
                 'pse_void_status':edi_void_status,
                 'pse_void_status_response': pse_void_status_response,
                 'extra_msg': extra_msg,
@@ -716,6 +755,7 @@ class AccountEdiFormat(models.Model):
         # Chatter.
         message = _("The EDI document was successfully cancelled by the government (Void identifier: %s).", html_escape(invoice.l10n_pe_edi_pse_cancel_uid))
         invoice_update = {
+            'l10n_pe_edi_pse_cancel_uid': res['void_uid'],
             'l10n_pe_edi_pse_void_status':res['pse_void_status'],
             'l10n_pe_edi_pse_void_status_response':res['pse_void_status_response'],
             'l10n_pe_edi_void_xml_file':res['xml_url'],

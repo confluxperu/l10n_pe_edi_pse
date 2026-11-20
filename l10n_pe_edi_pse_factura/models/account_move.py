@@ -217,6 +217,8 @@ class AccountMove(models.Model):
         amount_pending = invoice.amount_total - free_amount
         for rec_line in invoice.line_ids.filtered(lambda l: l.account_type == 'asset_receivable'):
             amount = rec_line.amount_currency
+            if rec_line.date_maturity and rec_line.date_maturity <= invoice.invoice_date:
+                continue
             if first_time and free_amount:
                 amount -= free_amount
             
@@ -340,7 +342,7 @@ class AccountMove(models.Model):
     def action_l10n_pe_edi_pse_status(self):
         for rec in self:
             if rec.l10n_pe_edi_pse_status in ('ask_for_status','rejected') and rec.l10n_pe_edi_pse_uid:
-                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('sent',))
+                docs = rec.edi_document_ids.filtered(lambda d: d.state!='to_send')
                 edi_filename = '%s-%s-%s' % (
                     rec.company_id.vat,
                     rec.l10n_latam_document_type_id.code,
@@ -351,7 +353,7 @@ class AccountMove(models.Model):
     def action_l10n_pe_edi_pse_void_status(self):
         for rec in self:
             if rec.l10n_pe_edi_pse_void_status=='ask_for_status':
-                docs = rec.edi_document_ids.filtered(lambda d: d.state in ('cancelled',))
+                docs = rec.edi_document_ids.filtered(lambda d: d.state!='to_cancel')
                 docs.edi_format_id._l10n_pe_edi_pse_cancel_invoice_edi_step_2(rec)
 
 class AccountMoveLine(models.Model):
